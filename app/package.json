@@ -21,6 +21,7 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
+    "electron-updater": "^6.8.11",
     "exceljs": "^4.4.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.9",
@@ -41,8 +42,8 @@
     "vite": "^6.0.0"
   },
   "build": {
-    "appId": "com.josephadogeri.electronapp",
-    "productName": "Electron ViteApp Template",
+    "appId": "com.josephadogeridev.electronapp",
+    "productName": "Electron Vite App Template",
     "directories": {
       "output": "dist",
       "buildResources": "resources"
