@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { UpdateState } from '../../shared/types'
+import { UpdateBanner } from './components/UpdateBanner'
 import './App.css'
 import logo from '../../../resources/icon.png'
 
@@ -27,19 +28,7 @@ export function App() {
 
   return (
     <main className="starter">
-      {update?.status === 'downloading' && (
-        <div className="update-banner">
-          <span>Downloading update: {update.percent}%</span>
-          <progress value={update.percent} max={100} />
-        </div>
-      )}
-
-      {update?.status === 'downloaded' && (
-        <div className="update-banner ready">
-          <span>Version {update.version} is ready to install.</span>
-          <button onClick={() => window.api.installUpdate()}>Restart &amp; Install</button>
-        </div>
-      )}
+      <UpdateBanner update={update} onInstall={() => window.api.installUpdate()} />
 
       <img src={logo} alt="App Logo" className="logo" />
       <h1>Electron + Vite + React</h1>

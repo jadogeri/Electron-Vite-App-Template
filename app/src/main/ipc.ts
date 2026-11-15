@@ -4,8 +4,8 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { channels } from '../shared/channels'
 
 export function registerIPC(): void {
-  // Tip: Consider moving 'get-app-version' into your shared `channels` object
-  ipcMain.handle('get-app-version', () => app.getVersion())
+
+  ipcMain.handle(channels.getVersion , () => app.getVersion())
 
   ipcMain.handle(channels.openFile, async (event) => {
     const window = BrowserWindow.fromWebContents(event.sender)

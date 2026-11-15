@@ -3,7 +3,7 @@ import { channels } from '../shared/channels'
 import type { DesktopAPI, UpdateState } from '../shared/types'
 
 const api: DesktopAPI = {
-  getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+  getAppVersion: () => ipcRenderer.invoke(channels.getVersion),
   openFile: () => ipcRenderer.invoke(channels.openFile),
   saveFile: (defaultName, content) => ipcRenderer.invoke(channels.saveFile, defaultName, content),
   onCommand: (callback) => {
