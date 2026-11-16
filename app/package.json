@@ -69,7 +69,7 @@
       ]
     },
     "mac": {
-      "icon": "resources/icon.png",
+      "icon": "resources/icon.icns",
       "category": "public.app-category.utilities",
       "target": [
         "dmg",
