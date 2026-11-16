@@ -1,18 +1,34 @@
-# Core foundation
+# Background utility-process starter
 
-Branch: `feat/core-foundation`  
-Status: implemented for review; native smoke tests and release delivery require separate target-OS validation.
+Branch: `feat/worker-process`  
+Roadmap: **26. CPU-heavy tasks off the UI/main thread**  
+Status: **planned; this branch adds this specification only, not runtime functionality.**
 
-## Scope
+## Features to add
 
-Implement roadmap features 1–14 without adding native C++ build dependencies or requiring API keys. Keep optional features 15–30 in branch-local plans. Add animation and effects for startup, checking/downloading updates, and restart-to-install; never imply that the renderer can observe installer progress after exit.
+- Bundled Electron `utilityProcess` entry for a deterministic CPU-work example.
+- Shared request/progress/result/error envelopes with unique job IDs.
+- Main-process job manager with bounded concurrency, timeouts, cancellation, and crash cleanup.
+- Renderer progress/cancel UI through narrow validated IPC.
+- Restart workers only according to a bounded retry policy; never run arbitrary renderer-supplied code.
 
-## Acceptance criteria
+## Implementation map
 
-- Settings, routing, notifications, fallback UI, security boundaries, and window lifecycle are implemented.
-- `npm run typecheck`, `npm test`, `npm run build`, and `npm run test:ui` pass.
-- Browser tests cover loading/update/error/reduced-motion states with a test-only native bridge.
-- Documentation distinguishes implemented core from optional plans and browser checks from real native checks.
-- `main` is changed only after pull-request review; no release tag is created.
+Add `app/src/main/workers/`, a worker build entry in electron-vite, shared message schemas, and renderer task hook/example. Ensure the packaged worker path resolves inside the built output.
 
-See [the full roadmap](documentation/FEATURE_ROADMAP.md), [test guide](documentation/TESTING.md), and [contributor handbook](CONTRIBUTING.md).
+## Dependencies and security
+
+Electron built-in UtilityProcess API; no API keys. Define payload/output byte limits and CPU/memory budgets. Do not pass credentials or unvalidated filesystem paths to a worker; a utility process is not a security boundary for arbitrary code.
+
+## Acceptance tests
+
+- [ ] UI and main loop remain responsive during heavy work.
+- [ ] Progress is correlated to the correct job; stale/unknown messages are ignored.
+- [ ] Cancel, timeout, worker crash and app shutdown settle promises and release resources.
+- [ ] Oversized/malformed jobs and concurrency overflow are rejected.
+- [ ] Packaged Windows/macOS/Linux apps can start and terminate the bundled worker.
+- [ ] No orphan processes or duplicate event listeners after repeated tasks.
+
+## Integration
+
+Implement native process tests before merging `origin/feat/worker-process`. Renderer bridge mocks alone cannot validate worker lifecycle.
