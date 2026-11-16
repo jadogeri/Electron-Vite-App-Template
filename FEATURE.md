@@ -1,18 +1,34 @@
-# Core foundation
+# System tray and native notifications
 
-Branch: `feat/core-foundation`  
-Status: implemented for review; native smoke tests and release delivery require separate target-OS validation.
+Branch: `feat/system-tray`  
+Roadmap: **17. System tray / minimize-to-tray · 18. Native OS notifications**  
+Status: **planned; this branch adds this specification only, not runtime functionality.**
 
-## Scope
+## Features to add
 
-Implement roadmap features 1–14 without adding native C++ build dependencies or requiring API keys. Keep optional features 15–30 in branch-local plans. Add animation and effects for startup, checking/downloading updates, and restart-to-install; never imply that the renderer can observe installer progress after exit.
+- Retained main-process Tray instance with platform-appropriate icon assets.
+- Show/Hide/Quit menu and double-click restoration.
+- Explicit background-running preference; closing hides only when enabled and supported.
+- Native Notification wrapper with validated, bounded text and capability checks.
+- Notification clicks restore/focus the existing window; unsupported environments receive a renderer toast fallback.
 
-## Acceptance criteria
+## Implementation map
 
-- Settings, routing, notifications, fallback UI, security boundaries, and window lifecycle are implemented.
-- `npm run typecheck`, `npm test`, `npm run build`, and `npm run test:ui` pass.
-- Browser tests cover loading/update/error/reduced-motion states with a test-only native bridge.
-- Documentation distinguishes implemented core from optional plans and browser checks from real native checks.
-- `main` is changed only after pull-request review; no release tag is created.
+Add `app/src/main/tray.ts` and `notifications.ts`; extend settings schemas, lifecycle, and the narrow shared IPC contract. Ensure app quit, updater restart, and tray hide cannot block one another.
 
-See [the full roadmap](documentation/FEATURE_ROADMAP.md), [test guide](documentation/TESTING.md), and [contributor handbook](CONTRIBUTING.md).
+## Dependencies and permissions
+
+Built-in Electron APIs. Supply distinct monochrome/template macOS tray assets. Respect OS notification permission and user intent; do not request unrelated renderer permissions.
+
+## Acceptance tests
+
+- [ ] Tray menu works on Windows, macOS, and supported Linux desktop environments.
+- [ ] Closing with background mode off still quits as documented.
+- [ ] Explicit Quit/update install bypasses hide-on-close.
+- [ ] Tray and listeners are destroyed once during shutdown/window recreation.
+- [ ] Notification unsupported/denied/click paths have automated fakes plus native smoke checks.
+- [ ] Notification content is not written to diagnostic logs.
+
+## Integration
+
+Do not treat this plan as a working tray implementation. Implement, run core checks, then merge `origin/feat/system-tray` into the target app after review.
