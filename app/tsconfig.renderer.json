@@ -11,5 +11,5 @@
     "types": ["vite/client", "node"],
     "noEmit": true
   },
-  "include": ["src/renderer/src/App.tsx", "src/renderer/src/main.tsx", "src/renderer/src/workspace/**/*", "src/shared/**/*", "src/preload/index.d.ts", "tests/**/*"]
+  "include": ["src/renderer/src/**/*", "src/shared/**/*", "tests/**/*", "playwright.config.ts"]
 }
