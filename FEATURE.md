@@ -1,18 +1,33 @@
-# Core foundation
+# Frameless window and startup splash
 
-Branch: `feat/core-foundation`  
-Status: implemented for review; native smoke tests and release delivery require separate target-OS validation.
+Branch: `feat/frameless-window`  
+Roadmap: **15. Custom frameless title bar · 16. Startup splash screen**  
+Status: **planned; this branch adds this specification only, not runtime functionality.**
 
-## Scope
+## Features to add
 
-Implement roadmap features 1–14 without adding native C++ build dependencies or requiring API keys. Keep optional features 15–30 in branch-local plans. Add animation and effects for startup, checking/downloading updates, and restart-to-install; never imply that the renderer can observe installer progress after exit.
+- Opt-in frameless BrowserWindow with a draggable title bar; interactive controls use `-webkit-app-region: no-drag`.
+- Typed minimize, maximize/restore, and close requests; main validates the sender and operates only on its owning window.
+- Accessible cross-platform window controls with macOS traffic-light accommodation.
+- Lightweight local splash window during initialization, destroyed on ready-to-show, timeout, or startup failure.
+- Subtle loading animation and fade transition, disabled for reduced motion; no artificial initialization delay.
 
-## Acceptance criteria
+## Implementation map
 
-- Settings, routing, notifications, fallback UI, security boundaries, and window lifecycle are implemented.
-- `npm run typecheck`, `npm test`, `npm run build`, and `npm run test:ui` pass.
-- Browser tests cover loading/update/error/reduced-motion states with a test-only native bridge.
-- Documentation distinguishes implemented core from optional plans and browser checks from real native checks.
-- `main` is changed only after pull-request review; no release tag is created.
+Extend `app/src/main/window.ts`, the shared IPC contract, and preload; add renderer `TitleBar`/`Splash` components and tests. Keep the existing geometry persistence, navigation protections, CSP, and updater intact.
 
-See [the full roadmap](documentation/FEATURE_ROADMAP.md), [test guide](documentation/TESTING.md), and [contributor handbook](CONTRIBUTING.md).
+## Dependencies and configuration
+
+Use built-in Electron/CSS APIs. No extra packages or secrets. Make frameless mode a deliberate setting/build option; do not silently remove native accessibility behavior.
+
+## Acceptance tests
+
+- [ ] Minimize, maximize/restore, close, drag, resize, keyboard focus, and double-click work on Windows/macOS/Linux.
+- [ ] Title controls never invoke arbitrary window IDs or channels.
+- [ ] Splash closes exactly once on success; failure/timeout does not leave an orphan process.
+- [ ] Tests cover transitions, error paths, and reduced motion.
+- [ ] Merge alongside another optional branch without removing core settings or IPC protections.
+
+## Integration
+
+Implement and test before using this branch as an add-on. Once approved: fetch, merge `origin/feat/frameless-window`, run all checks, then perform native window smoke tests. See `documentation/TESTING.md`.
