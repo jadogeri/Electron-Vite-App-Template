@@ -1,18 +1,34 @@
-# Core foundation
+# Internationalization starter
 
-Branch: `feat/core-foundation`  
-Status: implemented for review; native smoke tests and release delivery require separate target-OS validation.
+Branch: `feat/i18n`  
+Roadmap: **27. OS locale detection and i18next translations**  
+Status: **planned; this branch adds this specification only, not runtime functionality.**
 
-## Scope
+## Features to add
 
-Implement roadmap features 1–14 without adding native C++ build dependencies or requiring API keys. Keep optional features 15–30 in branch-local plans. Add animation and effects for startup, checking/downloading updates, and restart-to-install; never imply that the renderer can observe installer progress after exit.
+- Detect `app.getLocale()` after Electron readiness, normalize language tags, and map to bundled locales.
+- i18next/react-i18next setup with English fallback and at least one additional complete example locale.
+- Typed locale preference persisted through the existing settings store.
+- Translate navigation, loading, updater, error fallback and notification strings; localize native menus.
+- Locale-aware number/date formatting and a documented RTL strategy.
 
-## Acceptance criteria
+## Implementation map
 
-- Settings, routing, notifications, fallback UI, security boundaries, and window lifecycle are implemented.
-- `npm run typecheck`, `npm test`, `npm run build`, and `npm run test:ui` pass.
-- Browser tests cover loading/update/error/reduced-motion states with a test-only native bridge.
-- Documentation distinguishes implemented core from optional plans and browser checks from real native checks.
-- `main` is changed only after pull-request review; no release tag is created.
+Add local translation resources and initialization, shared locale allowlist, main locale method, settings language selector, and translated menu construction. Do not replace the existing theme preference or settings validation.
 
-See [the full roadmap](documentation/FEATURE_ROADMAP.md), [test guide](documentation/TESTING.md), and [contributor handbook](CONTRIBUTING.md).
+## Dependencies and security
+
+`i18next` and `react-i18next`, with a synchronized lockfile. Bundle translations locally; no remote script or runtime translation fetch requirement. Render translation strings as text, not untrusted HTML.
+
+## Acceptance tests
+
+- [ ] Supported OS locale is chosen on first launch and explicit preference survives restart.
+- [ ] Unsupported locale/missing key falls back to English without blank UI.
+- [ ] All core routes, updater statuses, loading and errors have translations.
+- [ ] Interpolated versions/percentages are escaped and correctly formatted.
+- [ ] Layout tolerates long translations; keyboard/accessibility labels remain meaningful.
+- [ ] Locale changes update renderer and native menu without duplicate listeners.
+
+## Integration
+
+Implement translations and tests before merging `origin/feat/i18n`. This specification does not yet install i18next or translate the core.
