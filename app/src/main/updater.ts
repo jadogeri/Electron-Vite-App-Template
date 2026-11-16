@@ -6,6 +6,7 @@ import { assertTrustedSender } from './trust'
 import { log } from './logger'
 import { handle } from './handle'
 import type { UpdateState } from '../shared/types'
+import { createUpdateErrorReporter, performUpdateCheck } from './update-errors'
 
 const { autoUpdater } = updater
 
@@ -19,16 +20,14 @@ function sendState(next: UpdateState): void {
   }
 }
 
+const reportUpdateError = createUpdateErrorReporter(sendState, log)
+
 export async function checkForUpdates(): Promise<void> {
   if (!app.isPackaged) {
     sendState({ status: 'not-available' })
     return
   }
-  try { await autoUpdater.checkForUpdates() }
-  catch {
-    log.warn({ event: 'update-check-failed' })
-    sendState({ status: 'error', message: 'Unable to check for updates. Please try again later.' })
-  }
+  await performUpdateCheck(() => autoUpdater.checkForUpdates(), reportUpdateError)
 }
 
 export function registerUpdater(_mainWindow: BrowserWindow): void {
@@ -43,8 +42,10 @@ export function registerUpdater(_mainWindow: BrowserWindow): void {
   autoUpdater.on('download-progress', (progress) =>
     sendState({ status: 'downloading', percent: updatePercent(progress.percent) }))
   autoUpdater.on('update-downloaded', (info) => sendState({ status: 'downloaded', version: info.version }))
-  autoUpdater.on('error', () =>
-    sendState({ status: 'error', message: 'The update could not finish. Please try again later.' }))
+  // A failed check both emits an error event and rejects its promise.
+  // Both paths must classify the empty-feed case identically.
+  autoUpdater.on('error', (error) =>
+    reportUpdateError(error, state.status === 'checking' ? 'check' : 'update'))
 
   handle('getUpdateState', (event) => { assertTrustedSender(event); return state })
   handle('checkForUpdates', (event) => {

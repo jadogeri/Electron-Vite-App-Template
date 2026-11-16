@@ -23,6 +23,7 @@ export function UpdateBanner({ update, onInstall }: UpdateBannerProps) {
     : update.status === 'downloading' ? `Downloading update: ${percent}%`
     : update.status === 'downloaded' ? `Version ${update.version} is ready to install.`
     : update.status === 'not-available' ? 'You are up to date.'
+    : update.status === 'not-configured' ? "Updates haven't been set up yet. No release has been published."
     : update.status === 'error' ? update.message : ''
 
   async function install() {

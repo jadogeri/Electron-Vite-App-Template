@@ -26,6 +26,8 @@ For a memory-constrained development container with a system Chromium, use `PLAY
 - Updater checking, available, downloading, downloaded, restart-in-progress, no-update, and error states.
 - Installation rejection/retry, disabled duplicate install button, escaped error text.
 - Reduced-motion CSS.
+- Empty GitHub Atom feed through the real electron-updater provider with fake HTTP, event-plus-rejection handling, genuine update-error preservation, and later release discovery.
+- Informational setup UI and manual-check transitions to available updates or real failures.
 
 ## Boundaries
 
