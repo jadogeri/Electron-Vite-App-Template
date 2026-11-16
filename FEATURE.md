@@ -1,18 +1,34 @@
-# Core foundation
+# Deep links and encrypted credential storage
 
-Branch: `feat/core-foundation`  
-Status: implemented for review; native smoke tests and release delivery require separate target-OS validation.
+Branch: `feat/auth-security`  
+Roadmap: **23. Custom protocol / deep links · 24. Electron safeStorage credentials**  
+Status: **planned; this branch adds this specification only, not runtime functionality.**
 
-## Scope
+## Features to add
 
-Implement roadmap features 1–14 without adding native C++ build dependencies or requiring API keys. Keep optional features 15–30 in branch-local plans. Add animation and effects for startup, checking/downloading updates, and restart-to-install; never imply that the renderer can observe installer progress after exit.
+- Register an application-specific URL scheme and handle macOS `open-url` plus Windows/Linux launch/second-instance arguments.
+- Queue validated callbacks until the main window is ready, then complete a single pending OAuth flow.
+- Browser-based OAuth authorization-code flow with PKCE, random state, expiry, and replay protection.
+- Encrypt tokens with main-process `safeStorage`; persist only ciphertext under userData with restrictive file permissions.
+- Narrow session/status/logout methods; do not expose refresh tokens or plaintext credential reads to renderer.
 
-## Acceptance criteria
+## Implementation map
 
-- Settings, routing, notifications, fallback UI, security boundaries, and window lifecycle are implemented.
-- `npm run typecheck`, `npm test`, `npm run build`, and `npm run test:ui` pass.
-- Browser tests cover loading/update/error/reduced-motion states with a test-only native bridge.
-- Documentation distinguishes implemented core from optional plans and browser checks from real native checks.
-- `main` is changed only after pull-request review; no release tag is created.
+Add protocol parsing and callback tests, main auth/session modules, schema-validated IPC, packaging protocol declarations, and a provider adapter. Preserve the existing single-instance focus handler when adding argument processing.
 
-See [the full roadmap](documentation/FEATURE_ROADMAP.md), [test guide](documentation/TESTING.md), and [contributor handbook](CONTRIBUTING.md).
+## Dependencies and configuration
+
+Choose the identity provider at implementation time. Public desktop clients use PKCE, never an embedded client secret. Store any server-side secrets outside the desktop binary. On Linux, check encryption availability **and backend**; reject plaintext-like `basic_text` instead of silently storing tokens insecurely.
+
+## Acceptance tests
+
+- [ ] Malformed/wrong scheme, host, path, missing/wrong state, replay and expired callback are rejected.
+- [ ] Cold start, existing instance and macOS callbacks complete exactly once.
+- [ ] Browser cancellation and provider failure leave a recoverable signed-out state.
+- [ ] Missing keychain/safeStorage backend fails closed.
+- [ ] Logout removes ciphertext and revokes server sessions where supported.
+- [ ] No token appears in renderer events, logs, URLs after processing, or test artifacts.
+
+## Integration
+
+This plan is not an authentication system. Implement the provider and native tests before merging `origin/feat/auth-security`.
