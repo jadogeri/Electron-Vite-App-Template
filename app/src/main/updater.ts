@@ -1,40 +1,68 @@
-import { BrowserWindow, ipcMain } from 'electron'
-import { autoUpdater } from 'electron-updater'
-import { is } from '@electron-toolkit/utils'
+import { app, BrowserWindow } from 'electron'
+import updater from 'electron-updater'
 import { channels } from '../shared/channels'
+import { updatePercent } from '../shared/validation'
+import { assertTrustedSender } from './trust'
+import { log } from './logger'
+import { handle } from './handle'
 import type { UpdateState } from '../shared/types'
 
-export function registerUpdater(mainWindow: BrowserWindow): void {
-  const sendState = (state: UpdateState) => {
-    if (!mainWindow.isDestroyed()) {
-      mainWindow.webContents.send(channels.updateStatus, state)
-    }
+const { autoUpdater } = updater
+
+let registered = false
+let state: UpdateState = { status: 'idle' }
+
+function sendState(next: UpdateState): void {
+  state = next
+  for (const window of BrowserWindow.getAllWindows()) {
+    if (!window.isDestroyed()) window.webContents.send(channels.updateStatus, state)
   }
+}
 
+export async function checkForUpdates(): Promise<void> {
+  if (!app.isPackaged) {
+    sendState({ status: 'not-available' })
+    return
+  }
+  try { await autoUpdater.checkForUpdates() }
+  catch {
+    log.warn({ event: 'update-check-failed' })
+    sendState({ status: 'error', message: 'Unable to check for updates. Please try again later.' })
+  }
+}
+
+export function registerUpdater(_mainWindow: BrowserWindow): void {
+  if (registered) return
+  registered = true
   autoUpdater.autoDownload = true
-  autoUpdater.autoInstallOnAppQuit = true
-
+  autoUpdater.autoInstallOnAppQuit = false
+  autoUpdater.logger = log
   autoUpdater.on('checking-for-update', () => sendState({ status: 'checking' }))
-  autoUpdater.on('update-available', (info) =>
-    sendState({ status: 'available', version: info.version })
-  )
+  autoUpdater.on('update-available', (info) => sendState({ status: 'available', version: info.version }))
   autoUpdater.on('update-not-available', () => sendState({ status: 'not-available' }))
   autoUpdater.on('download-progress', (progress) =>
-    sendState({ status: 'downloading', percent: Math.round(progress.percent) })
-  )
-  autoUpdater.on('update-downloaded', (info) =>
-    sendState({ status: 'downloaded', version: info.version })
-  )
-  autoUpdater.on('error', (err) =>
-    sendState({ status: 'error', message: err.message })
-  )
+    sendState({ status: 'downloading', percent: updatePercent(progress.percent) }))
+  autoUpdater.on('update-downloaded', (info) => sendState({ status: 'downloaded', version: info.version }))
+  autoUpdater.on('error', () =>
+    sendState({ status: 'error', message: 'The update could not finish. Please try again later.' }))
 
-  ipcMain.handle(channels.installUpdate, () => {
-    autoUpdater.quitAndInstall()
+  handle('getUpdateState', (event) => { assertTrustedSender(event); return state })
+  handle('checkForUpdates', (event) => {
+    assertTrustedSender(event)
+    return checkForUpdates()
   })
-
-  // Only check for updates in packaged production builds
-  if (!is.dev) {
-    autoUpdater.checkForUpdatesAndNotify()
-  }
+  handle('installUpdate', async (event) => {
+    assertTrustedSender(event)
+    if (!app.isPackaged || state.status !== 'downloaded') throw new Error('No downloaded update is ready')
+    const previous = state
+    sendState({ status: 'installing' })
+    // Let the renderer paint the restart notice; installation continues in the native installer after exit.
+    await new Promise((resolve) => setTimeout(resolve, 400))
+    try { autoUpdater.quitAndInstall() }
+    catch {
+      sendState(previous)
+      throw new Error('Unable to restart for installation')
+    }
+  })
+  if (app.isPackaged) void checkForUpdates()
 }

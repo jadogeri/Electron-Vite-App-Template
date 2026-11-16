@@ -1,6 +1,5 @@
 import { app, BrowserWindow, Menu, shell } from 'electron'
-import { autoUpdater } from 'electron-updater'
-import { is } from '@electron-toolkit/utils'
+import { checkForUpdates } from './updater'
 import { channels } from '../shared/channels'
 
 export function registerAppMenu(mainWindow: BrowserWindow): void {
@@ -104,13 +103,7 @@ export function registerAppMenu(mainWindow: BrowserWindow): void {
         },
         {
           label: 'Check for Updates…',
-          click: () => {
-            if (!is.dev) {
-              autoUpdater.checkForUpdatesAndNotify()
-            } else {
-              sendCommand('check-updates-dev')
-            }
-          }
+          click: () => { void checkForUpdates() }
         },
         ...(!isMac
           ? [
