@@ -12,6 +12,7 @@ export type UpdateState =
   | { status: 'downloaded'; version: string }
   | { status: 'installing' }
   | { status: 'not-available' }
+  | { status: 'not-configured' }
   | { status: 'error'; message: string }
 
 export interface DesktopAPI {
