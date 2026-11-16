@@ -1,18 +1,34 @@
-# Core foundation
+# Offline SQLite database starter
 
-Branch: `feat/core-foundation`  
-Status: implemented for review; native smoke tests and release delivery require separate target-OS validation.
+Branch: `feat/sqlite-db`  
+Roadmap: **22. better-sqlite3 + Drizzle ORM local database**  
+Status: **planned; this branch adds this specification only, not runtime functionality.**
 
-## Scope
+## Features to add
 
-Implement roadmap features 1–14 without adding native C++ build dependencies or requiring API keys. Keep optional features 15–30 in branch-local plans. Add animation and effects for startup, checking/downloading updates, and restart-to-install; never imply that the renderer can observe installer progress after exit.
+- Main-process better-sqlite3 connection in `app.getPath('userData')`, never the installation directory.
+- Drizzle schema/migration example for a small notes table, including stable IDs and timestamps.
+- Typed, bounded CRUD methods through preload; no raw SQL IPC surface.
+- Versioned migrations, foreign keys, transactions, and WAL where appropriate.
+- Connection cleanup before shutdown or updater restart; backup/recovery guidance.
 
-## Acceptance criteria
+## Implementation map
 
-- Settings, routing, notifications, fallback UI, security boundaries, and window lifecycle are implemented.
-- `npm run typecheck`, `npm test`, `npm run build`, and `npm run test:ui` pass.
-- Browser tests cover loading/update/error/reduced-motion states with a test-only native bridge.
-- Documentation distinguishes implemented core from optional plans and browser checks from real native checks.
-- `main` is changed only after pull-request review; no release tag is created.
+Add `app/src/main/database/`, migration assets, shared note DTO schemas, and a renderer example view. Package migration files and unpack the native addon from ASAR. Run Electron native rebuild after installation and on each release platform/architecture.
 
-See [the full roadmap](documentation/FEATURE_ROADMAP.md), [test guide](documentation/TESTING.md), and [contributor handbook](CONTRIBUTING.md).
+## Dependencies
+
+`better-sqlite3`, `drizzle-orm`; development `drizzle-kit` and appropriate types/rebuild tooling. Pin compatible versions and update the lockfile. Native C++ build tools are required when prebuilds are unavailable. No remote database key.
+
+## Acceptance tests
+
+- [ ] Fresh database migration, repeat startup, CRUD, rollback, and invalid input tests pass.
+- [ ] Queries are parameterized; path and SQL strings cannot be supplied by renderer.
+- [ ] Packaged app loads the native addon on Windows/macOS/Linux for supported architectures.
+- [ ] Migration failures preserve data and show an actionable error.
+- [ ] Concurrent operations and shutdown do not corrupt the database.
+- [ ] Native dependencies remain absent from core/main until explicitly merged.
+
+## Integration
+
+Only after implementation: merge `origin/feat/sqlite-db`, reinstall, rebuild native modules, and test **packaged** binaries. Browser-only tests are insufficient.
