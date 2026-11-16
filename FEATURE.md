@@ -1,18 +1,35 @@
-# Core foundation
+# Code signing, notarization and updater channels
 
-Branch: `feat/core-foundation`  
-Status: implemented for review; native smoke tests and release delivery require separate target-OS validation.
+Branch: `feat/code-signing`  
+Roadmap: **29. Trusted distribution signing · 30. latest/beta/alpha update channels**  
+Status: **planned; this branch adds this specification only, not runtime functionality.**
 
-## Scope
+## Features to add
 
-Implement roadmap features 1–14 without adding native C++ build dependencies or requiring API keys. Keep optional features 15–30 in branch-local plans. Add animation and effects for startup, checking/downloading updates, and restart-to-install; never imply that the renderer can observe installer progress after exit.
+- macOS Developer ID signing, hardened runtime, entitlements, notarization and stapling.
+- Windows trusted signing configured through supported electron-builder tooling and a signing identity/certificate service.
+- Validate platform artifacts before publication; signing failure must fail the release rather than silently produce unsigned files.
+- Persist `latest`/`beta`/`alpha` preference in schema-validated settings and apply it before checking for updates.
+- Explicit prerelease consent, coherent version/channel metadata and safe stable-channel return behavior.
 
-## Acceptance criteria
+## Implementation map
 
-- Settings, routing, notifications, fallback UI, security boundaries, and window lifecycle are implemented.
-- `npm run typecheck`, `npm test`, `npm run build`, and `npm run test:ui` pass.
-- Browser tests cover loading/update/error/reduced-motion states with a test-only native bridge.
-- Documentation distinguishes implemented core from optional plans and browser checks from real native checks.
-- `main` is changed only after pull-request review; no release tag is created.
+Extend electron-builder config, CI release matrix and secrets, main settings/updater, shared channel schema and Settings UI. Keep signed configuration opt-in until credentials are configured; never add placeholder certificate values to source.
 
-See [the full roadmap](documentation/FEATURE_ROADMAP.md), [test guide](documentation/TESTING.md), and [contributor handbook](CONTRIBUTING.md).
+## Required accounts and secrets
+
+Apple Developer membership/signing identity/notarization access and a Windows signing identity/provider. Use GitHub encrypted secrets for signing material and source-map/signing tokens. Document names and presence only, never values. No credentials are required or requested by this planning branch.
+
+## Acceptance tests
+
+- [ ] macOS `codesign`/`spctl` and stapler validation succeed on downloaded artifacts.
+- [ ] Windows signature chain/timestamp verifies on a clean machine.
+- [ ] Missing signing configuration fails the signed-release workflow clearly.
+- [ ] Stable clients never receive prerelease versions without consent.
+- [ ] Channel changes, interrupted downloads and returning to stable obey explicit downgrade policy.
+- [ ] Signed install-and-update smoke tests pass on actual target OS/architectures.
+- [ ] Signing secrets and private keys do not appear in logs, bundles, or uploaded artifacts.
+
+## Integration
+
+Implement platform credentials/configuration and channel tests before merging `origin/feat/code-signing`. Default core release artifacts remain unsigned; this plan does not confer notarization or trusted signing.
