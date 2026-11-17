@@ -1,5 +1,9 @@
 # Authentication and encrypted credentials
 
+**Status: Completed — implementation and automated checks.** Release/native/account acceptance remains pending as detailed below. The original specification is preserved in [the historical plan](auth-security-original-plan.md).
+
+Branch-source checks: both TypeScript projects, 37 unit tests, full production build, and 7 installed-feature browser scenarios passed. Integrated suite: 91 unit tests and 37 production-browser scenarios, no skips. Windows/macOS/Linux unsigned native and packaged SQLite/utility-process smoke passed in [CI](https://github.com/jadogeri/Electron-Vite-App-Template/actions/runs/44120989994). This does not certify signing, real providers, keychains or every interactive OS behavior.
+
 ## Status
 
 Runtime implementation is present, not a documentation-only feature. Automated checks

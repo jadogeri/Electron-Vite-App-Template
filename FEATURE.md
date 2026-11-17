@@ -1,43 +1,32 @@
-# Deep links and encrypted credential storage
+# auth-security
 
-Branch: `feat/auth-security`  
-Roadmap: **23. Custom protocol / deep links · 24. Electron safeStorage credentials**  
-Status: **implemented for review; target-OS and external-account acceptance is separate.**
+Branch: `feat/auth-security`
 
-## Implemented scope from the original plan
+Status: **Completed — implementation and automated checks.**
 
-- Register an application-specific URL scheme and handle macOS `open-url` plus Windows/Linux launch/second-instance arguments.
-- Queue validated callbacks until the main window is ready, then complete a single pending OAuth flow.
-- Browser-based OAuth authorization-code flow with PKCE, random state, expiry, and replay protection.
-- Encrypt tokens with main-process `safeStorage`; persist only ciphertext under userData with restrictive file permissions.
-- Narrow session/status/logout methods; do not expose refresh tokens or plaintext credential reads to renderer.
+Release/native/account acceptance: **Pending where listed below; not implied by implementation completion.**
 
-## Implementation map
+## Delivered
 
-Add protocol parsing and callback tests, main auth/session modules, schema-validated IPC, packaging protocol declarations, and a provider adapter. Preserve the existing single-instance focus handler when adding argument processing.
+Public OIDC PKCE/state/nonce/JWKS validation, bounded native callbacks and main-only safeStorage ciphertext. This branch contains current main, the common secure feature framework and only this optional plugin with its required dependency/build changes. Other optional plugin directories and dependencies are absent.
 
-## Dependencies and configuration
+## Verified evidence
 
-Choose the identity provider at implementation time. Public desktop clients use PKCE, never an embedded client secret. Store any server-side secrets outside the desktop binary. On Linux, check encryption availability **and backend**; reject plaintext-like `basic_text` instead of silently storing tokens insecurely.
+- [x] Main-process and renderer TypeScript checks passed on this branch.
+- [x] All 37 branch unit tests passed.
+- [x] Full production main/preload/renderer build passed.
+- [x] Dependency lock portability and declared dependency reconciliation passed.
+- [x] All 7 installed-feature production-browser scenarios passed on this branch; absent-plugin scenarios skipped only after checking actual source files.
 
-## Acceptance tests
+The complete compatible suite separately passed **91 unit tests and all 37 production-renderer browser scenarios with no skips**. Browser bridges are transport doubles, not proof of native APIs or real providers. Actual unsigned Electron and packaged SQLite/utility-process smoke passed on Windows, macOS and Linux in [native CI](https://github.com/jadogeri/Electron-Vite-App-Template/actions/runs/44120989994); this integrated evidence is not a claim that this branch passed every native acceptance item.
 
-- [ ] Malformed/wrong scheme, host, path, missing/wrong state, replay and expired callback are rejected.
-- [ ] Cold start, existing instance and macOS callbacks complete exactly once.
-- [ ] Browser cancellation and provider failure leave a recoverable signed-out state.
-- [ ] Missing keychain/safeStorage backend fails closed.
-- [ ] Logout removes ciphertext and revokes server sessions where supported.
-- [ ] No token appears in renderer events, logs, URLs after processing, or test artifacts.
+## Remaining release acceptance
 
-## Integration
+Live provider login/revocation, packaged callback registration, native keychains and Windows NTFS ACLs. These items remain explicit release checks. No main merge, tag or release was created.
 
-This plan is not an authentication system. Implement the provider and native tests before merging `origin/feat/auth-security`.
+## Traceability
 
-
-## Implementation and evidence
-
-This branch now contains current main, the shared validated plugin framework, and only the auth-security implementation with its required dependencies. It is not an all-features snapshot.
-
-See [plan, implementation, tests and remaining acceptance](documentation/features/auth-security.md). The integrated suite passed combined main/renderer typechecks, 91 unit tests (including real Node SQLite), and a full production build. Browser and native/package CI outcomes are recorded separately in the integration PR; do not infer a target-OS/provider/signature result from unit tests.
-
-The original acceptance checklist above is retained as release validation, not falsely checked off. No main merge, tag or release was made.
+- [Implementation, security boundaries, tests and remaining acceptance](documentation/features/auth-security.md)
+- [Original historical specification](documentation/features/auth-security-original-plan.md)
+- [Complete integration review](https://github.com/jadogeri/Electron-Vite-App-Template/pull/3)
+- [Selecting optional branches](documentation/FEATURE_INTEGRATION.md)
