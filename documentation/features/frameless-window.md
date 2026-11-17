@@ -1,7 +1,10 @@
 # Frameless window and startup splash
 
+**Status: Completed — implementation and automated checks.** Release/native/account acceptance remains pending as detailed below. The original specification is preserved in [the historical plan](frameless-window-original-plan.md).
+
+Branch-source checks: both TypeScript projects, 24 unit tests, full production build, and 2 installed-feature browser scenarios passed. Integrated suite: 91 unit tests and 37 production-browser scenarios, no skips. Windows/macOS/Linux unsigned native and packaged SQLite/utility-process smoke passed in [CI](https://github.com/jadogeri/Electron-Vite-App-Template/actions/runs/44120989994). This does not certify signing, real providers, keychains or every interactive OS behavior.
+
 Status: **Implemented; automated checks passed; target-OS acceptance pending.**
-The original plan is `FEATURE.md` on `feat/frameless-window`; this document does not mark untested native behavior complete.
 
 ## Implemented
 

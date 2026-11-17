@@ -1,5 +1,9 @@
 # SQLite notes
 
+**Status: Completed — implementation and automated checks.** Release/native/account acceptance remains pending as detailed below. The original specification is preserved in [the historical plan](sqlite-db-original-plan.md).
+
+Branch-source checks: both TypeScript projects, 21 unit tests, full production build, and 2 installed-feature browser scenarios passed. Integrated suite: 91 unit tests and 37 production-browser scenarios, no skips. Windows/macOS/Linux unsigned native and packaged SQLite/utility-process smoke passed in [CI](https://github.com/jadogeri/Electron-Vite-App-Template/actions/runs/44120989994). This does not certify signing, real providers, keychains or every interactive OS behavior.
+
 ## Status
 
 **Implemented; local database tests completed. Packaged native verification pending.**
@@ -54,9 +58,7 @@ known-good backup if available. Closed/checkpointed files can be copied as a
 consistent backup; copying only a live database while ignoring its WAL is unsafe.
 This starter is not an encryption or scheduled backup solution.
 
-Pending: packaged Windows/macOS/Linux addon loading for supported architectures,
-updater-restart cleanup in a packaged app, forced-power-loss recovery and
-multi-instance lock-contention testing. No native package or release was published.
+Completed on Windows/macOS/Linux CI runners: actual Electron and unsigned packaged addon loading, disk CRUD/rollback/reopen. Pending: additional OS/architecture coverage, updater-restart cleanup, forced-power-loss recovery and multi-instance lock contention. No signed package or release was published.
 
 ## Native integration runner
 
@@ -81,4 +83,4 @@ an explicit CI-only command-line switch, before creating normal windows.
 Packaged mode resolves addon dependencies and `out/main/worker-process.cjs`
 relative to `app.getAppPath()`, exercising native ASAR-unpack resolution.
 The runner does not itself edit the main entry or packaging configuration.
-Native execution remains pending until that CI/target-OS run actually succeeds.
+The integrated CI/target-OS run succeeded on Windows, macOS and Linux; the runner and explicit packaged CLI switch are included. Remaining release checks above are not implied by this smoke result.

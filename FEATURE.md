@@ -1,7 +1,7 @@
 # Integrated optional desktop features
 
 Branch: `implementation/all-features`  
-Status: all ten optional feature implementations are present for review. Clean-install main/renderer typechecks, 91 unit tests and production build passed. Browser and cross-OS native outcomes are recorded in the PR as they finish; real credentials/signatures remain separate acceptance work.
+Status: **Completed — all ten implementations and automated checks.** Clean-install main/renderer typechecks, 91 unit tests, full production build and all 37 production-browser scenarios passed with no skips. Actual unsigned Electron and packaged SQLite/utility-process smoke passed on Windows, macOS and Linux. Real credentials, trusted signatures and manual OS acceptance remain separate pending release work.
 
 ## Scope
 
