@@ -16,6 +16,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: app
@@ -36,11 +37,25 @@ jobs:
       - run: npm run build
       - run: npm run native:rebuild
       - if: runner.os == 'Linux'
+        name: Configure development Electron sandbox
+        run: |
+          sudo chown root:root node_modules/electron/dist/chrome-sandbox
+          sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
+      - if: runner.os == 'Linux'
         run: xvfb-run -a npm run test:native
+        timeout-minutes: 2
       - if: runner.os != 'Linux'
         run: npm run test:native
+        timeout-minutes: 2
       - run: npx electron-builder --dir --publish never --config.win.signAndEditExecutable=false
       - if: runner.os == 'Linux'
+        name: Configure packaged Electron sandbox
+        run: |
+          sudo chown root:root dist/linux-unpacked/chrome-sandbox
+          sudo chmod 4755 dist/linux-unpacked/chrome-sandbox
+      - if: runner.os == 'Linux'
         run: xvfb-run -a npm run test:packaged
+        timeout-minutes: 2
       - if: runner.os != 'Linux'
         run: npm run test:packaged
+        timeout-minutes: 2

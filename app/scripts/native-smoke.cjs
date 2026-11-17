@@ -175,6 +175,8 @@ async function runNativeSmokeAndExit(options = {}) {
 }
 
 module.exports = { runNativeSmoke, runNativeSmokeAndExit }
-if (require.main === module) void runNativeSmokeAndExit({
+// Electron's browser bootstrap can own require.main even for a direct CJS
+// entry. Check the explicit CLI entry as well; packaged imports must not rerun.
+if (require.main === module || (process.argv[1] && resolve(process.argv[1]) === __filename)) void runNativeSmokeAndExit({
   packaged: process.argv.includes('--native-smoke-packaged')
 })
