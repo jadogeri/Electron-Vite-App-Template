@@ -1,43 +1,32 @@
-# Opt-in crash reporting and telemetry
+# telemetry-sentry
 
-Branch: `feat/telemetry-sentry`  
-Roadmap: **28. Sentry / PostHog integration hook**  
-Status: **implemented for review; target-OS and external-account acceptance is separate.**
+Branch: `feat/telemetry-sentry`
 
-## Implemented scope from the original plan
+Status: **Completed — implementation and automated checks.**
 
-- Provider adapter for main/renderer crash reporting; choose one provider for the first implementation.
-- Explicit consent, **off by default**, with durable versioned preference and revocation.
-- Initialize SDK/network activity only after consent; document exactly what is collected.
-- Scrub tokens, user text, file paths, URL query strings, headers, and other sensitive context before transmission.
-- Keep local diagnostics working when telemetry is disabled, offline, or fails.
+Release/native/account acceptance: **Pending where listed below; not implied by implementation completion.**
 
-## Implementation map
+## Delivered
 
-Add main/renderer provider adapters, settings consent control, redaction tests, and scoped CSP `connect-src` changes only for the selected provider. Integrate error boundary/crash events without bypassing existing fallback behavior.
+Default-off versioned consent, main-only Sentry initialization and allowlisted error-code diagnostics. This branch contains current main, the common secure feature framework and only this optional plugin with its required dependency/build changes. Other optional plugin directories and dependencies are absent.
 
-## Dependencies and configuration
+## Verified evidence
 
-Optional `@sentry/electron` or PostHog SDK after a provider decision. Configure endpoints/project IDs explicitly. Build-time source-map upload tokens belong only in CI secrets and must never enter the application bundle. Do not record sessions/screenshots by default.
+- [x] Main-process and renderer TypeScript checks passed on this branch.
+- [x] All 22 branch unit tests passed.
+- [x] Full production main/preload/renderer build passed.
+- [x] Dependency lock portability and declared dependency reconciliation passed.
+- [x] All 1 installed-feature production-browser scenarios passed on this branch; absent-plugin scenarios skipped only after checking actual source files.
 
-## Acceptance tests
+The complete compatible suite separately passed **91 unit tests and all 37 production-renderer browser scenarios with no skips**. Browser bridges are transport doubles, not proof of native APIs or real providers. Actual unsigned Electron and packaged SQLite/utility-process smoke passed on Windows, macOS and Linux in [native CI](https://github.com/jadogeri/Electron-Vite-App-Template/actions/runs/44120989994); this integrated evidence is not a claim that this branch passed every native acceptance item.
 
-- [ ] No SDK initialization, crash upload, background event, or outbound request before consent.
-- [ ] Consent enables only documented events; revocation prevents future transmission.
-- [ ] Redaction tests contain synthetic sensitive data and verify its removal.
-- [ ] Provider outage never blocks startup, shutdown, or error handling.
-- [ ] Production release IDs match uploaded source maps without embedding upload credentials.
-- [ ] Network inspection confirms disabled telemetry is silent on all target systems.
+## Remaining release acceptance
 
-## Integration
+Real Sentry account delivery; full source-mapped native crashes are not implemented or claimed. These items remain explicit release checks. No main merge, tag or release was created.
 
-Implement the privacy policy, consent flow and provider before merging `origin/feat/telemetry-sentry`. No telemetry is enabled by this plan.
+## Traceability
 
-
-## Implementation and evidence
-
-This branch now contains current main, the shared validated plugin framework, and only the telemetry-sentry implementation with its required dependencies. It is not an all-features snapshot.
-
-See [plan, implementation, tests and remaining acceptance](documentation/features/telemetry-sentry.md). The integrated suite passed combined main/renderer typechecks, 91 unit tests (including real Node SQLite), and a full production build. Browser and native/package CI outcomes are recorded separately in the integration PR; do not infer a target-OS/provider/signature result from unit tests.
-
-The original acceptance checklist above is retained as release validation, not falsely checked off. No main merge, tag or release was made.
+- [Implementation, security boundaries, tests and remaining acceptance](documentation/features/telemetry-sentry.md)
+- [Original historical specification](documentation/features/telemetry-sentry-original-plan.md)
+- [Complete integration review](https://github.com/jadogeri/Electron-Vite-App-Template/pull/3)
+- [Selecting optional branches](documentation/FEATURE_INTEGRATION.md)
