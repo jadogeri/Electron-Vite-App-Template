@@ -7,6 +7,9 @@ on:
     paths: ['app/**', '.github/workflows/**']
 permissions:
   contents: read
+concurrency:
+  group: desktop-tests-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 jobs:
   tests:
     runs-on: ubuntu-latest

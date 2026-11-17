@@ -1,43 +1,32 @@
-# Offline SQLite database starter
+# sqlite-db
 
-Branch: `feat/sqlite-db`  
-Roadmap: **22. better-sqlite3 + Drizzle ORM local database**  
-Status: **implemented for review; target-OS and external-account acceptance is separate.**
+Branch: `feat/sqlite-db`
 
-## Implemented scope from the original plan
+Status: **Completed — implementation and automated checks.**
 
-- Main-process better-sqlite3 connection in `app.getPath('userData')`, never the installation directory.
-- Drizzle schema/migration example for a small notes table, including stable IDs and timestamps.
-- Typed, bounded CRUD methods through preload; no raw SQL IPC surface.
-- Versioned migrations, foreign keys, transactions, and WAL where appropriate.
-- Connection cleanup before shutdown or updater restart; backup/recovery guidance.
+Release/native/account acceptance: **Pending where listed below; not implied by implementation completion.**
 
-## Implementation map
+## Delivered
 
-Add `app/src/main/database/`, migration assets, shared note DTO schemas, and a renderer example view. Package migration files and unpack the native addon from ASAR. Run Electron native rebuild after installation and on each release platform/architecture.
+Real main-process SQLite and Drizzle notes CRUD, versioned transactions/migrations and native packaging. This branch contains current main, the common secure feature framework and only this optional plugin with its required dependency/build changes. Other optional plugin directories and dependencies are absent.
 
-## Dependencies
+## Verified evidence
 
-`better-sqlite3`, `drizzle-orm`; development `drizzle-kit` and appropriate types/rebuild tooling. Pin compatible versions and update the lockfile. Native C++ build tools are required when prebuilds are unavailable. No remote database key.
+- [x] Main-process and renderer TypeScript checks passed on this branch.
+- [x] All 21 branch unit tests passed.
+- [x] Full production main/preload/renderer build passed.
+- [x] Dependency lock portability and declared dependency reconciliation passed.
+- [x] All 2 installed-feature production-browser scenarios passed on this branch; absent-plugin scenarios skipped only after checking actual source files.
 
-## Acceptance tests
+The complete compatible suite separately passed **91 unit tests and all 37 production-renderer browser scenarios with no skips**. Browser bridges are transport doubles, not proof of native APIs or real providers. Actual unsigned Electron and packaged SQLite/utility-process smoke passed on Windows, macOS and Linux in [native CI](https://github.com/jadogeri/Electron-Vite-App-Template/actions/runs/44120989994); this integrated evidence is not a claim that this branch passed every native acceptance item.
 
-- [ ] Fresh database migration, repeat startup, CRUD, rollback, and invalid input tests pass.
-- [ ] Queries are parameterized; path and SQL strings cannot be supplied by renderer.
-- [ ] Packaged app loads the native addon on Windows/macOS/Linux for supported architectures.
-- [ ] Migration failures preserve data and show an actionable error.
-- [ ] Concurrent operations and shutdown do not corrupt the database.
-- [ ] Native dependencies remain absent from core/main until explicitly merged.
+## Remaining release acceptance
 
-## Integration
+Architecture coverage beyond CI runners, real user recovery/backup and installer delivery. These items remain explicit release checks. No main merge, tag or release was created.
 
-Only after implementation: merge `origin/feat/sqlite-db`, reinstall, rebuild native modules, and test **packaged** binaries. Browser-only tests are insufficient.
+## Traceability
 
-
-## Implementation and evidence
-
-This branch now contains current main, the shared validated plugin framework, and only the sqlite-db implementation with its required dependencies. It is not an all-features snapshot.
-
-See [plan, implementation, tests and remaining acceptance](documentation/features/sqlite-db.md). The integrated suite passed combined main/renderer typechecks, 91 unit tests (including real Node SQLite), and a full production build. Browser and native/package CI outcomes are recorded separately in the integration PR; do not infer a target-OS/provider/signature result from unit tests.
-
-The original acceptance checklist above is retained as release validation, not falsely checked off. No main merge, tag or release was made.
+- [Implementation, security boundaries, tests and remaining acceptance](documentation/features/sqlite-db.md)
+- [Original historical specification](documentation/features/sqlite-db-original-plan.md)
+- [Complete integration review](https://github.com/jadogeri/Electron-Vite-App-Template/pull/3)
+- [Selecting optional branches](documentation/FEATURE_INTEGRATION.md)
