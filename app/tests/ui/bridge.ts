@@ -11,6 +11,7 @@ declare global {
       release: () => void
       installs: number
       rejectInstall: boolean
+      checkResult: UpdateState
     }
   }
 }
@@ -33,7 +34,8 @@ export async function mockBridge(page: Page, options: { slow?: boolean; fail?: b
       toast: (value) => toasts.forEach((fn) => fn(value)),
       command: (value) => commands.forEach((fn) => fn(value)),
       theme: (dark) => themes.forEach((fn) => fn(dark)),
-      release: () => resolve(), installs: 0, rejectInstall: false
+      release: () => resolve(), installs: 0, rejectInstall: false,
+      checkResult: { status: 'not-available' }
     }
     const api: DesktopAPI = {
       getAppVersion: async () => { await ready; if (fail) throw new Error('startup'); return '1.0.0' },
@@ -46,7 +48,7 @@ export async function mockBridge(page: Page, options: { slow?: boolean; fail?: b
       onToast: (fn) => subscribe(toasts, fn),
       onThemeChanged: (fn) => subscribe(themes, fn),
       onUpdateStatus: (fn) => subscribe(updates, fn),
-      checkForUpdates: async () => window.__test.update({ status: 'not-available' }),
+      checkForUpdates: async () => window.__test.update(window.__test.checkResult),
       installUpdate: async () => {
         window.__test.installs++
         if (window.__test.rejectInstall) throw new Error('installer rejected')
