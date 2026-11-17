@@ -113,6 +113,8 @@ Still pending before the original feature acceptance criteria are fully satisfie
 4. Native keyboard/screen-reader checks of account controls and packaged build checks.
 5. Review OS account protections/ACLs: POSIX chmod is tested here; Windows ACL behavior
    depends on Electron's per-user userData directory and requires target-OS validation.
+   Windows runs retain ciphertext, round-trip, atomic-file cleanup, and logout-deletion
+   assertions but skip POSIX mode-bit assertions; a passing test is not proof of NTFS ACLs.
 
 ## Limits and threat model
 

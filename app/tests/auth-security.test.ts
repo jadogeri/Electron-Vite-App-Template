@@ -207,15 +207,19 @@ const fakeEncryption: Encryption = {
   encryptString: value => Buffer.from(value.split('').reverse().join('')),
   decryptString: value => value.toString().split('').reverse().join('')
 }
-test('vault atomically persists ciphertext with restricted POSIX permissions and logout deletes it', async () => {
+test('vault atomically persists ciphertext, checks POSIX permissions where supported, and deletes on logout', async () => {
   const folder = await mkdtemp(join(tmpdir(), 'auth-security-test-'))
   try {
     const vault = new EncryptedVault(folder, fakeEncryption, 'linux')
     await vault.write(credentials())
     const directory = join(folder, 'auth-security')
     assert.deepEqual(await readdir(directory), ['session.enc'])
-    assert.equal((await stat(directory)).mode & 0o777, 0o700)
-    assert.equal((await stat(join(directory, 'session.enc'))).mode & 0o777, 0o600)
+    // Windows stat/chmod mode bits do not establish NTFS ACL confidentiality.
+    // Ciphertext, round-trip, cleanup and deletion checks below still run on all OSes.
+    if (process.platform !== 'win32') {
+      assert.equal((await stat(directory)).mode & 0o777, 0o700)
+      assert.equal((await stat(join(directory, 'session.enc'))).mode & 0o777, 0o600)
+    }
     assert.equal((await readFile(join(directory, 'session.enc'))).includes(Buffer.from('synthetic-access')), false)
     assert.deepEqual(await vault.read(), credentials())
     await vault.clear()
