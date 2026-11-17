@@ -31,7 +31,25 @@ For a memory-constrained development container with a system Chromium, use `PLAY
 
 ## Boundaries
 
-Playwright runs the **renderer in Chromium**, not an Electron executable. Its typed fake `window.api` lives only in the test fixture. Native operations, settings persistence on disk, updater network activity, real installation, and OS keychains are not proven by these tests. Node tests exercise pure validation and the existing JSON helper, not Electron APIs.
+Playwright runs the **renderer in Chromium**, not an Electron executable. Test-only `window.api` and optional `window.features` doubles exercise the real renderer components, routing, accessibility labels, errors, privacy and listener cleanup. They do not prove native dialogs, OS keychains, tray behavior or provider delivery. Node tests additionally execute real better-sqlite3/Drizzle disk CRUD, migration rollback and reopen; queue tests use deterministic HTTP/clock fakes and worker-manager tests use controlled child transports.
+
+## Native data and process checks
+
+Run Node unit tests **before** rebuilding the addon for Electron. The two runtimes use different native ABIs:
+
+```bash
+npm ci
+npm test
+npm run build
+npm run native:rebuild
+npm run test:native
+npx electron-builder --dir --publish never
+npm run test:packaged
+```
+
+Linux CI uses `xvfb-run -a` for the native commands. The unsigned native matrix runs on Windows, macOS and Linux. It checks actual Electron-loaded SQLite disk CRUD/rollback/reopen and actual built utility-process progress/result/termination; packaged mode loads the addon from the packaged application and exercises the packaged worker path. The explicit `--native-smoke` CLI mode uses temporary data only, never a renderer IPC method or the user's database. Passing this smoke does not certify installation, signing, protocol registration, desktop tray integration or real providers.
+
+To return to Node tests after Electron native rebuild, run `npm rebuild better-sqlite3` for the host Node ABI first. For fresh development installs, `npm ci` builds the host addon; `npm run native:rebuild` prepares Electron.
 
 ## Native smoke checklist before release
 
