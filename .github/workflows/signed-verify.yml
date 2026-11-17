@@ -30,6 +30,7 @@ jobs:
           cache-dependency-path: app/package-lock.json
       - name: Fail closed before dependencies or build
         run: node scripts/signing/validate.cjs
+      - run: node scripts/check-lock.cjs
       - run: npm ci
       - run: npm run typecheck && npm test && npm run build
       - name: Build without publishing

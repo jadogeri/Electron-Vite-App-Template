@@ -6,6 +6,7 @@
   "private": true,
   "author": "Joseph Adogeri",
   "scripts": {
+    "preinstall": "node scripts/check-lock.cjs",
     "dev": "electron-vite dev",
     "predev": "electron-builder install-app-deps",
     "prepreview": "electron-builder install-app-deps",
