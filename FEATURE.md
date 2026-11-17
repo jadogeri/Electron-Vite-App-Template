@@ -1,43 +1,32 @@
-# Connectivity detection and offline sync queue
+# offline-sync
 
-Branch: `feat/offline-sync`  
-Roadmap: **25. Online/offline detection and queued synchronization**  
-Status: **implemented for review; target-OS and external-account acceptance is separate.**
+Branch: `feat/offline-sync`
 
-## Implemented scope from the original plan
+Status: **Completed — implementation and automated checks.**
 
-- Renderer connectivity indicator driven by online/offline events and a bounded first-party health check.
-- Treat `navigator.onLine` as a hint, not proof the backend is reachable.
-- Durable queue with stable operation IDs, payload validation, retry metadata, and backoff/jitter.
-- Drain serially on verified reconnection; use idempotency keys and avoid duplicate requests.
-- Visible pending/retrying/failed states and explicit conflict resolution hooks.
+Release/native/account acceptance: **Pending where listed below; not implied by implementation completion.**
 
-## Implementation map
+## Delivered
 
-Add main sync service/queue adapter, network-status events, renderer hook/status banner, and deterministic fake-clock/network tests. Use atomic JSON storage for the small starter queue; SQLite integration remains optional rather than an undeclared branch dependency.
+Durable bounded HTTPS operation queue, idempotency keys, backend reachability and explicit conflict/retry UI. This branch contains current main, the common secure feature framework and only this optional plugin with its required dependency/build changes. Other optional plugin directories and dependencies are absent.
 
-## Configuration and security
+## Verified evidence
 
-No third-party package required for the basic example. The target app must choose a backend, auth adapter, conflict policy, maximum payload/queue size, and retention period. Never queue credentials; sensitive domain data needs its own storage policy.
+- [x] Main-process and renderer TypeScript checks passed on this branch.
+- [x] All 25 branch unit tests passed.
+- [x] Full production main/preload/renderer build passed.
+- [x] Dependency lock portability and declared dependency reconciliation passed.
+- [x] All 1 installed-feature production-browser scenarios passed on this branch; absent-plugin scenarios skipped only after checking actual source files.
 
-## Acceptance tests
+The complete compatible suite separately passed **91 unit tests and all 37 production-renderer browser scenarios with no skips**. Browser bridges are transport doubles, not proof of native APIs or real providers. Actual unsigned Electron and packaged SQLite/utility-process smoke passed on Windows, macOS and Linux in [native CI](https://github.com/jadogeri/Electron-Vite-App-Template/actions/runs/44120989994); this integrated evidence is not a claim that this branch passed every native acceptance item.
 
-- [ ] Offline events update UI; reconnect verifies actual backend availability.
-- [ ] Queue survives restart without losing or duplicating operations.
-- [ ] Backoff, timeout, abort, permanent errors and maximum retries are covered.
-- [ ] Concurrent drains cannot run; shutdown cancels safely.
-- [ ] Retry after ambiguous network failure uses the same idempotency key.
-- [ ] Conflicts remain visible rather than silently overwriting user changes.
+## Remaining release acceptance
 
-## Integration
+A deployed compatible backend and physical offline/reconnect behavior. These items remain explicit release checks. No main merge, tag or release was created.
 
-Implement the backend contract and acceptance tests before merging `origin/feat/offline-sync`; this branch currently contains no synchronization runtime.
+## Traceability
 
-
-## Implementation and evidence
-
-This branch now contains current main, the shared validated plugin framework, and only the offline-sync implementation with its required dependencies. It is not an all-features snapshot.
-
-See [plan, implementation, tests and remaining acceptance](documentation/features/offline-sync.md). The integrated suite passed combined main/renderer typechecks, 91 unit tests (including real Node SQLite), and a full production build. Browser and native/package CI outcomes are recorded separately in the integration PR; do not infer a target-OS/provider/signature result from unit tests.
-
-The original acceptance checklist above is retained as release validation, not falsely checked off. No main merge, tag or release was made.
+- [Implementation, security boundaries, tests and remaining acceptance](documentation/features/offline-sync.md)
+- [Original historical specification](documentation/features/offline-sync-original-plan.md)
+- [Complete integration review](https://github.com/jadogeri/Electron-Vite-App-Template/pull/3)
+- [Selecting optional branches](documentation/FEATURE_INTEGRATION.md)
