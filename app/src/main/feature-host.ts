@@ -43,7 +43,9 @@ export async function setupFeatures(): Promise<void> {
       notify: (event, payload) => {
         if (!namePattern.test(event)) throw new Error('Invalid feature event')
         assertSafeData(payload)
-        for (const window of getMainWindows()) window.webContents.send(featureChannels.event, id, event, payload)
+        for (const window of getMainWindows()) {
+          try { if (!window.webContents.isDestroyed()) window.webContents.send(featureChannels.event, id, event, payload) } catch {}
+        }
       }
     })
     if (!plugin || !plugin.methods || Object.keys(plugin.methods).some(key => !namePattern.test(key))) {
@@ -51,10 +53,15 @@ export async function setupFeatures(): Promise<void> {
     }
     plugins.set(id, plugin)
   }
-  ipcMain.handle(featureChannels.list, event => { assertTrustedSender(event); return [...plugins.keys()] })
+  const trustedMain = (event: Electron.IpcMainInvokeEvent) => {
+    assertTrustedSender(event)
+    if (!getMainWindows().some(window => window.webContents === event.sender)) throw new Error('Untrusted feature sender')
+  }
+  ipcMain.handle(featureChannels.list, event => { trustedMain(event); return [...plugins.keys()] })
   ipcMain.handle(featureChannels.call, async (event, id: unknown, method: unknown, input: unknown) => {
     try {
-      assertTrustedSender(event)
+      trustedMain(event)
+      if (quitting) throw new Error()
       if (typeof id !== 'string' || id.length > 40 || typeof method !== 'string' || !namePattern.test(method)) throw new Error()
       const plugin = plugins.get(id as FeatureId)
       if (!plugin || !Object.hasOwn(plugin.methods, method)) throw new Error()
@@ -82,7 +89,9 @@ export const featuresKeepAlive = (): boolean => !quitting && [...plugins.values(
 export function prepareFeatureQuit(): void {
   if (quitting) return
   quitting = true
-  for (const plugin of plugins.values()) plugin.beforeQuit?.()
+  for (const plugin of plugins.values()) {
+    try { plugin.beforeQuit?.() } catch { /* Continue cleanup for remaining plugins. */ }
+  }
 }
 export function shutdownFeatures(): Promise<void> {
   prepareFeatureQuit()

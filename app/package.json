@@ -17,8 +17,20 @@
     "test": "tsx --test tests/*.test.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.renderer.json",
     "test:ui": "playwright test"
+    ,"test:native": "electron scripts/native-smoke.cjs",
+    "test:packaged": "node scripts/test-packaged.cjs",
+    "native:rebuild": "electron-builder install-app-deps",
+    "build:signed": "npm run build && electron-builder --config electron-builder.signed.cjs --publish never",
+    "signing:validate": "node scripts/signing/validate.cjs"
   },
   "dependencies": {
+    "better-sqlite3": "^12.11.1",
+    "drizzle-orm": "^0.45.4",
+    "jose": "^6.1.0",
+    "i18next": "^27.1.5",
+    "react-i18next": "^18.0.2",
+    "@sentry/electron": "^8.4.0",
+    "semver": "^7.8.6",
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
     "electron-updater": "^6.8.11",
@@ -33,13 +45,15 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/semver": "^7.7.1",
     "@playwright/test": "^1.65.0",
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^4.3.4",
     "electron": "^35.7.5",
-    "electron-builder": "^25.1.8",
+    "electron-builder": "^26.0.12",
     "electron-vite": "^3.0.0",
     "tsx": "^4.23.15",
     "typescript": "^5.7.2",
@@ -49,6 +63,8 @@
     "autoprefixer": "^10.4.20"
   },
   "build": {
+    "asarUnpack": ["**/node_modules/better-sqlite3/**"],
+    "protocols": [{"name":"Electron Vite authentication","schemes":["electron-vite-template"]}],
     "appId": "com.josephadogeridev.electronapp",
     "productName": "Electron Vite App Template",
     "directories": {
@@ -58,6 +74,7 @@
     "files": [
       "out/**/*",
       "resources/**/*",
+      "scripts/native-smoke.cjs",
       "package.json"
     ],
     "publish": [{ "provider": "github", "owner": "jadogeri", "repo": "Electron-Vite-App-Template", "releaseType": "draft" }],
