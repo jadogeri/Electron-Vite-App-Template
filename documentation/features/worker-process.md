@@ -64,3 +64,21 @@ Pending: execute that harness in a supported Electron environment; verify
 packaged Windows/macOS/Linux worker spawn/termination, UI/main responsiveness,
 timeouts/crashes in real processes, no orphans after repeated native runs, and
 packaged path resolution. No claim of completed native acceptance is made.
+
+## Combined native integration smoke runner
+
+The preferred CI runner is now `electron scripts/native-smoke.cjs` from `app/`
+(Linux: `xvfb-run -a electron scripts/native-smoke.cjs`). It checks both the real
+native SQLite addon and the built worker. The worker must return exactly 78,498
+primes up to 1,000,000; a second worker must report actual progress before
+cancellation kills it and its exit is observed. Each worker has a 15-second
+deadline; the runner has a 40-second overall deadline and exits 0 only on
+success, otherwise nonzero. It cleans up its temporary database.
+
+Development mode resolves the app root from the script location, so Electron's
+script-mode `app.getAppPath()` cannot accidentally point it at `scripts/out`.
+The exported `runNativeSmokeAndExit({ packaged: true })` instead uses
+`app.getAppPath()` for the real packaged app root. Integration owns including
+this script in the package and invoking it from an explicit CI-only main-entry
+switch. Merely passing the packaged flag to a development Electron script is
+not evidence that a packaged app was tested.

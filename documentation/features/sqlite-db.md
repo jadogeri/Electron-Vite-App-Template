@@ -57,3 +57,28 @@ This starter is not an encryption or scheduled backup solution.
 Pending: packaged Windows/macOS/Linux addon loading for supported architectures,
 updater-restart cleanup in a packaged app, forced-power-loss recovery and
 multi-instance lock-contention testing. No native package or release was published.
+
+## Native integration runner
+
+After rebuilding `better-sqlite3` for the target Electron ABI and building the
+worker output, run from `app/`:
+
+```
+electron scripts/native-smoke.cjs
+```
+
+Linux CI should use `xvfb-run -a electron scripts/native-smoke.cjs`. The shared
+runner resolves the actual addon with `createRequire` anchored to the app's
+package, then performs real temporary disk CRUD, transaction rollback, close,
+reopen and delete. It also checks the real utility process. It exits zero only
+when all checks pass; failures/deadlines exit nonzero without raw driver errors.
+It does not touch the user's application database.
+
+For an actual packaged-app check, the integration must include
+`scripts/native-smoke.cjs` in packaged files and invoke
+`runNativeSmokeAndExit({ packaged: true })` from the packaged main entry under
+an explicit CI-only command-line switch, before creating normal windows.
+Packaged mode resolves addon dependencies and `out/main/worker-process.cjs`
+relative to `app.getAppPath()`, exercising native ASAR-unpack resolution.
+The runner does not itself edit the main entry or packaging configuration.
+Native execution remains pending until that CI/target-OS run actually succeeds.
