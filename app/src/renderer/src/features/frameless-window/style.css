@@ -1,0 +1,10 @@
+.desktop-titlebar{display:flex;align-items:center;gap:8px;min-height:38px;background:var(--bg,#172134);color:var(--text,inherit)}
+.desktop-drag{-webkit-app-region:drag;flex:1;min-height:38px;display:flex;align-items:center;padding:0 12px;user-select:none}
+.desktop-traffic-lights{padding-left:84px}
+.desktop-no-drag,.desktop-window-controls button{-webkit-app-region:no-drag}
+.desktop-titlebar details{position:relative}.desktop-titlebar details[open]{background:var(--bg,#172134);z-index:20}
+.desktop-titlebar details label,.desktop-titlebar details p{padding:8px}
+.desktop-window-controls{display:flex;gap:4px}
+.desktop-window-controls button{min-width:40px;min-height:36px}
+.desktop-window-preference{padding:4px 12px}
+@media(prefers-reduced-motion:no-preference){.desktop-titlebar{animation:desktop-titlebar-in .15s ease-out}@keyframes desktop-titlebar-in{from{opacity:0}to{opacity:1}}}
