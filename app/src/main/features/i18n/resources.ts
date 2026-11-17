@@ -3,6 +3,8 @@ import { createInstance, type i18n } from 'i18next'
 // Literal keys also serve as a readable fallback in the core localization adapter.
 export const en = {
   'Home': 'Home', 'Dashboard': 'Dashboard', 'Settings': 'Settings', 'Features': 'Features',
+  'Feature: {{name}}': 'Feature: {{name}}', 'Dismiss notification': 'Dismiss notification',
+  'Electron Starter': 'Electron Starter',
   'Main navigation': 'Main navigation', 'Application loading': 'Application loading',
   'Preparing your workspace': 'Preparing your workspace',
   'Loading settings and checking application state…': 'Loading settings and checking application state…',
@@ -54,6 +56,8 @@ export const en = {
 } as const
 export const es: Record<keyof typeof en, string> = {
   'Home': 'Inicio', 'Dashboard': 'Panel', 'Settings': 'Configuración', 'Features': 'Funciones',
+  'Feature: {{name}}': 'Función: {{name}}', 'Dismiss notification': 'Cerrar aviso',
+  'Electron Starter': 'Inicio de Electron',
   'Main navigation': 'Navegación principal', 'Application loading': 'Cargando la aplicación',
   'Preparing your workspace': 'Preparando tu espacio de trabajo',
   'Loading settings and checking application state…': 'Cargando la configuración y comprobando el estado de la aplicación…',
