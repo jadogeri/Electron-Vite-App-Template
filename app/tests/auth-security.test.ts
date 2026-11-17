@@ -210,7 +210,7 @@ const fakeEncryption: Encryption = {
 test('vault atomically persists ciphertext, checks POSIX permissions where supported, and deletes on logout', async () => {
   const folder = await mkdtemp(join(tmpdir(), 'auth-security-test-'))
   try {
-    const vault = new EncryptedVault(folder, fakeEncryption, 'linux')
+    const vault = new EncryptedVault(folder, fakeEncryption, process.platform)
     await vault.write(credentials())
     const directory = join(folder, 'auth-security')
     assert.deepEqual(await readdir(directory), ['session.enc'])
