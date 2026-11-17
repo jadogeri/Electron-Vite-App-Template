@@ -2,9 +2,9 @@
 
 Branch: `feat/sqlite-db`  
 Roadmap: **22. better-sqlite3 + Drizzle ORM local database**  
-Status: **planned; this branch adds this specification only, not runtime functionality.**
+Status: **implemented for review; target-OS and external-account acceptance is separate.**
 
-## Features to add
+## Implemented scope from the original plan
 
 - Main-process better-sqlite3 connection in `app.getPath('userData')`, never the installation directory.
 - Drizzle schema/migration example for a small notes table, including stable IDs and timestamps.
@@ -32,3 +32,12 @@ Add `app/src/main/database/`, migration assets, shared note DTO schemas, and a r
 ## Integration
 
 Only after implementation: merge `origin/feat/sqlite-db`, reinstall, rebuild native modules, and test **packaged** binaries. Browser-only tests are insufficient.
+
+
+## Implementation and evidence
+
+This branch now contains current main, the shared validated plugin framework, and only the sqlite-db implementation with its required dependencies. It is not an all-features snapshot.
+
+See [plan, implementation, tests and remaining acceptance](documentation/features/sqlite-db.md). The integrated suite passed combined main/renderer typechecks, 91 unit tests (including real Node SQLite), and a full production build. Browser and native/package CI outcomes are recorded separately in the integration PR; do not infer a target-OS/provider/signature result from unit tests.
+
+The original acceptance checklist above is retained as release validation, not falsely checked off. No main merge, tag or release was made.
