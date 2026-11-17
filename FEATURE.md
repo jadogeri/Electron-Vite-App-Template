@@ -1,43 +1,32 @@
-# Internationalization starter
+# i18n
 
-Branch: `feat/i18n`  
-Roadmap: **27. OS locale detection and i18next translations**  
-Status: **implemented for review; target-OS and external-account acceptance is separate.**
+Branch: `feat/i18n`
 
-## Implemented scope from the original plan
+Status: **Completed — implementation and automated checks.**
 
-- Detect `app.getLocale()` after Electron readiness, normalize language tags, and map to bundled locales.
-- i18next/react-i18next setup with English fallback and at least one additional complete example locale.
-- Typed locale preference persisted through the existing settings store.
-- Translate navigation, loading, updater, error fallback and notification strings; localize native menus.
-- Locale-aware number/date formatting and a documented RTL strategy.
+Release/native/account acceptance: **Pending where listed below; not implied by implementation completion.**
 
-## Implementation map
+## Delivered
 
-Add local translation resources and initialization, shared locale allowlist, main locale method, settings language selector, and translated menu construction. Do not replace the existing theme preference or settings validation.
+i18next/react-i18next system/en/es preference, core/native localization and safe interpolation. This branch contains current main, the common secure feature framework and only this optional plugin with its required dependency/build changes. Other optional plugin directories and dependencies are absent.
 
-## Dependencies and security
+## Verified evidence
 
-`i18next` and `react-i18next`, with a synchronized lockfile. Bundle translations locally; no remote script or runtime translation fetch requirement. Render translation strings as text, not untrusted HTML.
+- [x] Main-process and renderer TypeScript checks passed on this branch.
+- [x] All 22 branch unit tests passed.
+- [x] Full production main/preload/renderer build passed.
+- [x] Dependency lock portability and declared dependency reconciliation passed.
+- [x] All 1 installed-feature production-browser scenarios passed on this branch; absent-plugin scenarios skipped only after checking actual source files.
 
-## Acceptance tests
+The complete compatible suite separately passed **91 unit tests and all 37 production-renderer browser scenarios with no skips**. Browser bridges are transport doubles, not proof of native APIs or real providers. Actual unsigned Electron and packaged SQLite/utility-process smoke passed on Windows, macOS and Linux in [native CI](https://github.com/jadogeri/Electron-Vite-App-Template/actions/runs/44120989994); this integrated evidence is not a claim that this branch passed every native acceptance item.
 
-- [ ] Supported OS locale is chosen on first launch and explicit preference survives restart.
-- [ ] Unsupported locale/missing key falls back to English without blank UI.
-- [ ] All core routes, updater statuses, loading and errors have translations.
-- [ ] Interpolated versions/percentages are escaped and correctly formatted.
-- [ ] Layout tolerates long translations; keyboard/accessibility labels remain meaningful.
-- [ ] Locale changes update renderer and native menu without duplicate listeners.
+## Remaining release acceptance
 
-## Integration
+Target-OS locale-change behavior, translation review and screen-reader review. These items remain explicit release checks. No main merge, tag or release was created.
 
-Implement translations and tests before merging `origin/feat/i18n`. This specification does not yet install i18next or translate the core.
+## Traceability
 
-
-## Implementation and evidence
-
-This branch now contains current main, the shared validated plugin framework, and only the i18n implementation with its required dependencies. It is not an all-features snapshot.
-
-See [plan, implementation, tests and remaining acceptance](documentation/features/i18n.md). The integrated suite passed combined main/renderer typechecks, 91 unit tests (including real Node SQLite), and a full production build. Browser and native/package CI outcomes are recorded separately in the integration PR; do not infer a target-OS/provider/signature result from unit tests.
-
-The original acceptance checklist above is retained as release validation, not falsely checked off. No main merge, tag or release was made.
+- [Implementation, security boundaries, tests and remaining acceptance](documentation/features/i18n.md)
+- [Original historical specification](documentation/features/i18n-original-plan.md)
+- [Complete integration review](https://github.com/jadogeri/Electron-Vite-App-Template/pull/3)
+- [Selecting optional branches](documentation/FEATURE_INTEGRATION.md)
