@@ -1,5 +1,9 @@
 # Command palette, shortcuts and native context menus
 
+**Status: Completed — implementation and automated checks.** Release/native/account acceptance remains pending as detailed below. The original specification is preserved in [the historical plan](command-palette-original-plan.md).
+
+Branch-source checks: both TypeScript projects, 24 unit tests, full production build, and 3 installed-feature browser scenarios passed. Integrated suite: 91 unit tests and 37 production-browser scenarios, no skips. Windows/macOS/Linux unsigned native and packaged SQLite/utility-process smoke passed in [CI](https://github.com/jadogeri/Electron-Vite-App-Template/actions/runs/44120989994). This does not certify signing, real providers, keychains or every interactive OS behavior.
+
 Status: **Implemented; automated checks passed; browser/native acceptance pending.**
 Original acceptance criteria remain in `FEATURE.md` on `feat/command-palette`.
 

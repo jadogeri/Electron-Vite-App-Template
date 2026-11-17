@@ -1,43 +1,32 @@
-# Command palette, shortcuts and context menus
+# command-palette
 
-Branch: `feat/command-palette`  
-Roadmap: **19. Keyboard shortcuts · 20. Command palette · 21. Context menu helper**  
-Status: **implemented for review; target-OS and external-account acceptance is separate.**
+Branch: `feat/command-palette`
 
-## Implemented scope from the original plan
+Status: **Completed — implementation and automated checks.**
 
-- Searchable Cmd/Ctrl+K command palette for navigation, appearance, and update checks.
-- Cmd/Ctrl+, opens Settings. Keep these app-local unless the user explicitly enables OS-global shortcuts.
-- Central command registry shared by menu actions, keyboard dispatch, and palette.
-- Optional `globalShortcut` registrations only for intentional cross-app commands; detect registration failures and unregister on quit.
-- Reusable native context menus with an allowlisted set of edit/custom commands.
+Release/native/account acceptance: **Pending where listed below; not implied by implementation completion.**
 
-## Implementation map
+## Delivered
 
-Add renderer command registry, palette dialog, and focus-management tests; extend `app/src/main/menu.ts` and a bounded context-menu IPC method. Integrate existing Home/Dashboard/Settings routes and updater check.
+Searchable keyboard command palette, focus restoration/trap, bounded shortcuts and native context menus. This branch contains current main, the common secure feature framework and only this optional plugin with its required dependency/build changes. Other optional plugin directories and dependencies are absent.
 
-## Dependencies and security
+## Verified evidence
 
-A lightweight accessible dialog is sufficient; no API keys. Never let renderer strings become arbitrary native menu callbacks or executable commands. Respect input fields, composition events, and disabled actions.
+- [x] Main-process and renderer TypeScript checks passed on this branch.
+- [x] All 24 branch unit tests passed.
+- [x] Full production main/preload/renderer build passed.
+- [x] Dependency lock portability and declared dependency reconciliation passed.
+- [x] All 3 installed-feature production-browser scenarios passed on this branch; absent-plugin scenarios skipped only after checking actual source files.
 
-## Acceptance tests
+The complete compatible suite separately passed **91 unit tests and all 37 production-renderer browser scenarios with no skips**. Browser bridges are transport doubles, not proof of native APIs or real providers. Actual unsigned Electron and packaged SQLite/utility-process smoke passed on Windows, macOS and Linux in [native CI](https://github.com/jadogeri/Electron-Vite-App-Template/actions/runs/44120989994); this integrated evidence is not a claim that this branch passed every native acceptance item.
 
-- [ ] Cmd/Ctrl+K toggles the dialog; typing filters commands; Enter runs; Escape closes.
-- [ ] Focus is trapped while open and restored on close; keyboard-only use works.
-- [ ] Shortcuts are not registered twice after React StrictMode or window recreation.
-- [ ] Unknown command/context-menu identifiers are rejected by main.
-- [ ] Edit actions use Electron roles and honor editable/non-editable targets.
-- [ ] OS-global registration conflicts fail gracefully.
+## Remaining release acceptance
 
-## Integration
+OS shortcut conflicts, IME and screen-reader verification on target desktops. These items remain explicit release checks. No main merge, tag or release was created.
 
-Implement and validate before merging `origin/feat/command-palette`. Keep the core menu's existing shortcuts intact and document any changed bindings.
+## Traceability
 
-
-## Implementation and evidence
-
-This branch now contains current main, the shared validated plugin framework, and only the command-palette implementation with its required dependencies. It is not an all-features snapshot.
-
-See [plan, implementation, tests and remaining acceptance](documentation/features/command-palette.md). The integrated suite passed combined main/renderer typechecks, 91 unit tests (including real Node SQLite), and a full production build. Browser and native/package CI outcomes are recorded separately in the integration PR; do not infer a target-OS/provider/signature result from unit tests.
-
-The original acceptance checklist above is retained as release validation, not falsely checked off. No main merge, tag or release was made.
+- [Implementation, security boundaries, tests and remaining acceptance](documentation/features/command-palette.md)
+- [Original historical specification](documentation/features/command-palette-original-plan.md)
+- [Complete integration review](https://github.com/jadogeri/Electron-Vite-App-Template/pull/3)
+- [Selecting optional branches](documentation/FEATURE_INTEGRATION.md)
