@@ -44,7 +44,8 @@ async function authBridge(page: Page, initial: AuthStatus) {
         if (feature !== 'auth-security' || !['status', 'signIn', 'cancel', 'signOut'].includes(method)) {
           throw new Error('Unregistered account action')
         }
-        if (window.__authTest.failNext) {
+        // Failure injection targets user actions, never the asynchronous mount read.
+        if (window.__authTest.failNext && method !== 'status') {
           window.__authTest.failNext = false
           throw new Error('synthetic-private-access-token synthetic-private-refresh-token')
         }
@@ -72,6 +73,9 @@ const account = (page: Page) => page.getByRole('region', { name: 'Account securi
 async function openSettings(page: Page) {
   await page.goto('/#/settings')
   await expect(account(page)).toBeVisible()
+  // Region visibility precedes the initial bridge response. Wait for that response
+  // before mutating fixture flags or asserting action controls.
+  await expect(account(page).getByRole('status')).not.toHaveText('Loading account status…')
 }
 async function assertPrivateBoundary(page: Page) {
   const html = await account(page).evaluate(element => element.outerHTML)
