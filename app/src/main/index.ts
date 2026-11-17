@@ -57,9 +57,13 @@ else {
   app.on('second-instance', (_event, argv) => { argv.forEach(capture); focusMain() })
   app.whenReady().then(async () => {
     electronApp.setAppUserModelId('com.josephadogeridev.electronapp')
-    if (process.defaultApp && process.argv[1]) {
-      app.setAsDefaultProtocolClient('electron-vite-template', process.execPath, [process.argv[1]])
-    } else app.setAsDefaultProtocolClient('electron-vite-template')
+    // Independent non-auth branches must not claim the authentication scheme.
+    const hasAuth = Object.keys(import.meta.glob('./features/auth-security/index.ts')).length > 0
+    if (hasAuth) {
+      if (process.defaultApp && process.argv[1]) {
+        app.setAsDefaultProtocolClient('electron-vite-template', process.execPath, [process.argv[1]])
+      } else app.setAsDefaultProtocolClient('electron-vite-template')
+    }
     nativeTheme.themeSource = getSettings().theme
     setMenuRefresher(() => { const window = getMainWindows()[0]; if (window) registerAppMenu(window) })
     await setupFeatures()
