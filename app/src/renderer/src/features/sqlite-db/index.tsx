@@ -27,8 +27,10 @@ export default function Notes({ bridge }: { bridge: FeatureBridge }) {
     <h2>Local notes</h2><p>Stored on this device. Showing the first 100 notes; no data is sent online.</p>
     {error && <p role="alert">{error}</p>}
     <form onSubmit={event => { event.preventDefault(); void save() }}>
-      <label>Title <input value={title} maxLength={160} required onChange={e => setTitle(e.target.value)} /></label>
-      <label>Note <textarea value={body} maxLength={16384} onChange={e => setBody(e.target.value)} /></label>
+      <label htmlFor="sqlite-note-title">Title</label>
+      <input id="sqlite-note-title" value={title} maxLength={160} required onChange={e => setTitle(e.target.value)} />
+      <label htmlFor="sqlite-note-body">Note</label>
+      <textarea id="sqlite-note-body" value={body} maxLength={16384} onChange={e => setBody(e.target.value)} />
       <button disabled={busy || !title.trim()}>{editing ? 'Save changes' : 'Add note'}</button>
       {editing && <button type="button" onClick={() => { setEditing(null); setTitle(''); setBody('') }}>Cancel edit</button>}
     </form>
