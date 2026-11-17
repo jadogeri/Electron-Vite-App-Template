@@ -1,0 +1,56 @@
+name: Manual signed build and native verification
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  signed-verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    environment: signing-verification
+    defaults:
+      run:
+        working-directory: app
+        shell: bash
+    env:
+      CSC_LINK: ${{ matrix.os == 'macos-latest' && secrets.MAC_CSC_LINK || secrets.WINDOWS_CSC_LINK }}
+      CSC_KEY_PASSWORD: ${{ matrix.os == 'macos-latest' && secrets.MAC_CSC_KEY_PASSWORD || secrets.WINDOWS_CSC_KEY_PASSWORD }}
+      APPLE_ID: ${{ secrets.APPLE_ID }}
+      APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Fail closed before dependencies or build
+        run: node scripts/signing/validate.cjs
+      - run: node scripts/check-lock.cjs
+      - run: npm ci
+      - run: npm run typecheck && npm test && npm run build
+      - name: Build without publishing
+        run: npx --no-install electron-builder --config electron-builder.signed.cjs --publish never
+      - name: Verify macOS application trust and stapling
+        if: runner.os == 'macOS'
+        run: |
+          found=0
+          while IFS= read -r -d '' artifact; do
+            node scripts/signing/validate.cjs verify "$artifact"
+            found=1
+          done < <(find dist -maxdepth 3 -name '*.app' -type d -print0)
+          test "$found" -eq 1
+      - name: Verify Windows executable trust and timestamps
+        if: runner.os == 'Windows'
+        run: |
+          found=0
+          while IFS= read -r -d '' artifact; do
+            node scripts/signing/validate.cjs verify "$artifact"
+            found=1
+          done < <(find dist -maxdepth 3 -name '*.exe' -type f -print0)
+          test "$found" -eq 1
+      # Deliberately no uploads: signed artifact distribution needs separate review.
