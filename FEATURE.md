@@ -1,11 +1,11 @@
-# Core foundation
+# Common optional feature framework
 
-Branch: `feat/core-foundation`  
-Status: implemented for review; native smoke tests and release delivery require separate target-OS validation.
+Branch: `work/feature-host`  
+Status: implemented shared framework for independently selected feature branches; no optional plugin or provider is included here.
 
 ## Scope
 
-Implement roadmap features 1–14 without adding native C++ build dependencies or requiring API keys. Keep optional features 15–30 in branch-local plans. Add animation and effects for startup, checking/downloading updates, and restart-to-install; never imply that the renderer can observe installer progress after exit.
+Keeps current main and the updater empty-feed fix. Adds trusted bounded feature IPC, explicit main-window tracking, optional renderer slots, early authentication callback capture, lifecycle cleanup, English-default localization adapters and optional update/menu integration. No SQLite/Sentry/i18next/auth dependency is needed without selecting its feature.
 
 ## Acceptance criteria
 

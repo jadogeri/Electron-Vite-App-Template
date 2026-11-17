@@ -1,0 +1,45 @@
+name: Native feature verification
+on:
+  push:
+    branches: ['implementation/**', 'feat/**']
+    paths: ['app/**', '.github/workflows/native-smoke.yml']
+  pull_request:
+    paths: ['app/**', '.github/workflows/native-smoke.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native:
+    if: github.event_name == 'pull_request' || startsWith(github.ref_name, 'implementation/') || github.ref_name == 'feat/sqlite-db' || github.ref_name == 'feat/worker-process'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: app
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      # Node ABI checks must precede the Electron-target native rebuild.
+      - run: npm test
+      - run: npm run build
+      - run: npm run native:rebuild
+      - if: runner.os == 'Linux'
+        run: xvfb-run -a npm run test:native
+      - if: runner.os != 'Linux'
+        run: npm run test:native
+      - run: npx electron-builder --dir --publish never --config.win.signAndEditExecutable=false
+      - if: runner.os == 'Linux'
+        run: xvfb-run -a npm run test:packaged
+      - if: runner.os != 'Linux'
+        run: npm run test:packaged
