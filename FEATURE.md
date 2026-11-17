@@ -1,18 +1,19 @@
-# Core foundation
+# Integrated optional desktop features
 
-Branch: `feat/core-foundation`  
-Status: implemented for review; native smoke tests and release delivery require separate target-OS validation.
+Branch: `implementation/all-features`  
+Status: **Completed — all ten implementations and automated checks.** Clean-install main/renderer typechecks, 91 unit tests, full production build and all 37 production-browser scenarios passed with no skips. Actual unsigned Electron and packaged SQLite/utility-process smoke passed on Windows, macOS and Linux. Real credentials, trusted signatures and manual OS acceptance remain separate pending release work.
 
 ## Scope
 
-Implement roadmap features 1–14 without adding native C++ build dependencies or requiring API keys. Keep optional features 15–30 in branch-local plans. Add animation and effects for startup, checking/downloading updates, and restart-to-install; never imply that the renderer can observe installer progress after exit.
+Implements the ten original optional branches using independently discovered main/renderer plugins and a narrow validated bridge. Includes titlebar/splash, tray/notifications, command palette/context menus, SQLite/Drizzle, OIDC/safeStorage, offline synchronization, utility-process work, i18next localization, privacy-gated Sentry and fail-closed signing/update channels. Native SQLite is intentionally included only when its optional branch is selected.
 
 ## Acceptance criteria
 
-- Settings, routing, notifications, fallback UI, security boundaries, and window lifecycle are implemented.
-- `npm run typecheck`, `npm test`, `npm run build`, and `npm run test:ui` pass.
-- Browser tests cover loading/update/error/reduced-motion states with a test-only native bridge.
-- Documentation distinguishes implemented core from optional plans and browser checks from real native checks.
-- `main` is changed only after pull-request review; no release tag is created.
+- Keep existing core API and updater empty-feed behavior compatible.
+- Validate trusted main-window senders, methods, schemas, sizes and serializable data; sanitize feature failures.
+- Apply plugin options before window construction and attach immediately; use explicit tracked main windows.
+- Drain bounded early authentication callbacks; await shutdown and bypass close-to-tray before update installation.
+- Separate browser transport doubles, actual Node SQLite tests and Electron native/package smoke evidence.
+- Do not merge `main`, tag or publish a release in this change.
 
 See [the full roadmap](documentation/FEATURE_ROADMAP.md), [test guide](documentation/TESTING.md), and [contributor handbook](CONTRIBUTING.md).
