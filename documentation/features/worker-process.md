@@ -1,5 +1,9 @@
 # Bounded Electron utility-process work
 
+**Status: Completed — implementation and automated checks.** Release/native/account acceptance remains pending as detailed below. The original specification is preserved in [the historical plan](worker-process-original-plan.md).
+
+Branch-source checks: both TypeScript projects, 22 unit tests, full production build, and 1 installed-feature browser scenarios passed. Integrated suite: 91 unit tests and 37 production-browser scenarios, no skips. Windows/macOS/Linux unsigned native and packaged SQLite/utility-process smoke passed in [CI](https://github.com/jadogeri/Electron-Vite-App-Template/actions/runs/44120989994). This does not certify signing, real providers, keychains or every interactive OS behavior.
+
 ## Status
 
 **Implemented and algorithm/lifecycle tests completed. Native Electron and
@@ -60,10 +64,7 @@ The optional real Electron harness checks a 1,000,000 limit returns 78,498 and a
 second real process can be cancelled. Linux CI requires a display/Xvfb and its
 system libraries. Do not disable sandbox in shipped apps.
 
-Pending: execute that harness in a supported Electron environment; verify
-packaged Windows/macOS/Linux worker spawn/termination, UI/main responsiveness,
-timeouts/crashes in real processes, no orphans after repeated native runs, and
-packaged path resolution. No claim of completed native acceptance is made.
+Completed on Windows/macOS/Linux CI runners: real Electron and packaged worker spawn, progress, result, cancellation/exit and packaged path resolution using the preferred shared runner below. Pending: interactive UI/main responsiveness, deliberate native crashes/timeouts and prolonged repeated-run orphan checks. No claim of full native release acceptance is made.
 
 ## Combined native integration smoke runner
 

@@ -1,43 +1,32 @@
-# Background utility-process starter
+# worker-process
 
-Branch: `feat/worker-process`  
-Roadmap: **26. CPU-heavy tasks off the UI/main thread**  
-Status: **implemented for review; target-OS and external-account acceptance is separate.**
+Branch: `feat/worker-process`
 
-## Implemented scope from the original plan
+Status: **Completed — implementation and automated checks.**
 
-- Bundled Electron `utilityProcess` entry for a deterministic CPU-work example.
-- Shared request/progress/result/error envelopes with unique job IDs.
-- Main-process job manager with bounded concurrency, timeouts, cancellation, and crash cleanup.
-- Renderer progress/cancel UI through narrow validated IPC.
-- Restart workers only according to a bounded retry policy; never run arbitrary renderer-supplied code.
+Release/native/account acceptance: **Pending where listed below; not implied by implementation completion.**
 
-## Implementation map
+## Delivered
 
-Add `app/src/main/workers/`, a worker build entry in electron-vite, shared message schemas, and renderer task hook/example. Ensure the packaged worker path resolves inside the built output.
+Fixed built CJS utility-process entry, bounded prime jobs, progress, cancellation and crash/deadline settlement. This branch contains current main, the common secure feature framework and only this optional plugin with its required dependency/build changes. Other optional plugin directories and dependencies are absent.
 
-## Dependencies and security
+## Verified evidence
 
-Electron built-in UtilityProcess API; no API keys. Define payload/output byte limits and CPU/memory budgets. Do not pass credentials or unvalidated filesystem paths to a worker; a utility process is not a security boundary for arbitrary code.
+- [x] Main-process and renderer TypeScript checks passed on this branch.
+- [x] All 22 branch unit tests passed.
+- [x] Full production main/preload/renderer build passed.
+- [x] Dependency lock portability and declared dependency reconciliation passed.
+- [x] All 1 installed-feature production-browser scenarios passed on this branch; absent-plugin scenarios skipped only after checking actual source files.
 
-## Acceptance tests
+The complete compatible suite separately passed **91 unit tests and all 37 production-renderer browser scenarios with no skips**. Browser bridges are transport doubles, not proof of native APIs or real providers. Actual unsigned Electron and packaged SQLite/utility-process smoke passed on Windows, macOS and Linux in [native CI](https://github.com/jadogeri/Electron-Vite-App-Template/actions/runs/44120989994); this integrated evidence is not a claim that this branch passed every native acceptance item.
 
-- [ ] UI and main loop remain responsive during heavy work.
-- [ ] Progress is correlated to the correct job; stale/unknown messages are ignored.
-- [ ] Cancel, timeout, worker crash and app shutdown settle promises and release resources.
-- [ ] Oversized/malformed jobs and concurrency overflow are rejected.
-- [ ] Packaged Windows/macOS/Linux apps can start and terminate the bundled worker.
-- [ ] No orphan processes or duplicate event listeners after repeated tasks.
+## Remaining release acceptance
 
-## Integration
+Architecture coverage beyond CI runners and interactive responsiveness on real target desktops. These items remain explicit release checks. No main merge, tag or release was created.
 
-Implement native process tests before merging `origin/feat/worker-process`. Renderer bridge mocks alone cannot validate worker lifecycle.
+## Traceability
 
-
-## Implementation and evidence
-
-This branch now contains current main, the shared validated plugin framework, and only the worker-process implementation with its required dependencies. It is not an all-features snapshot.
-
-See [plan, implementation, tests and remaining acceptance](documentation/features/worker-process.md). The integrated suite passed combined main/renderer typechecks, 91 unit tests (including real Node SQLite), and a full production build. Browser and native/package CI outcomes are recorded separately in the integration PR; do not infer a target-OS/provider/signature result from unit tests.
-
-The original acceptance checklist above is retained as release validation, not falsely checked off. No main merge, tag or release was made.
+- [Implementation, security boundaries, tests and remaining acceptance](documentation/features/worker-process.md)
+- [Original historical specification](documentation/features/worker-process-original-plan.md)
+- [Complete integration review](https://github.com/jadogeri/Electron-Vite-App-Template/pull/3)
+- [Selecting optional branches](documentation/FEATURE_INTEGRATION.md)
