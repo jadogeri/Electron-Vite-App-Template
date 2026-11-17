@@ -1,43 +1,32 @@
-# System tray and native notifications
+# system-tray
 
-Branch: `feat/system-tray`  
-Roadmap: **17. System tray / minimize-to-tray · 18. Native OS notifications**  
-Status: **implemented for review; target-OS and external-account acceptance is separate.**
+Branch: `feat/system-tray`
 
-## Implemented scope from the original plan
+Status: **Completed — implementation and automated checks.**
 
-- Retained main-process Tray instance with platform-appropriate icon assets.
-- Show/Hide/Quit menu and double-click restoration.
-- Explicit background-running preference; closing hides only when enabled and supported.
-- Native Notification wrapper with validated, bounded text and capability checks.
-- Notification clicks restore/focus the existing window; unsupported environments receive a renderer toast fallback.
+Release/native/account acceptance: **Pending where listed below; not implied by implementation completion.**
 
-## Implementation map
+## Delivered
 
-Add `app/src/main/tray.ts` and `notifications.ts`; extend settings schemas, lifecycle, and the narrow shared IPC contract. Ensure app quit, updater restart, and tray hide cannot block one another.
+Persisted tray/background preferences, close-to-tray, explicit notification consent and in-app fallback. This branch contains current main, the common secure feature framework and only this optional plugin with its required dependency/build changes. Other optional plugin directories and dependencies are absent.
 
-## Dependencies and permissions
+## Verified evidence
 
-Built-in Electron APIs. Supply distinct monochrome/template macOS tray assets. Respect OS notification permission and user intent; do not request unrelated renderer permissions.
+- [x] Main-process and renderer TypeScript checks passed on this branch.
+- [x] All 26 branch unit tests passed.
+- [x] Full production main/preload/renderer build passed.
+- [x] Dependency lock portability and declared dependency reconciliation passed.
+- [x] All 1 installed-feature production-browser scenarios passed on this branch; absent-plugin scenarios skipped only after checking actual source files.
 
-## Acceptance tests
+The complete compatible suite separately passed **91 unit tests and all 37 production-renderer browser scenarios with no skips**. Browser bridges are transport doubles, not proof of native APIs or real providers. Actual unsigned Electron and packaged SQLite/utility-process smoke passed on Windows, macOS and Linux in [native CI](https://github.com/jadogeri/Electron-Vite-App-Template/actions/runs/44120989994); this integrated evidence is not a claim that this branch passed every native acceptance item.
 
-- [ ] Tray menu works on Windows, macOS, and supported Linux desktop environments.
-- [ ] Closing with background mode off still quits as documented.
-- [ ] Explicit Quit/update install bypasses hide-on-close.
-- [ ] Tray and listeners are destroyed once during shutdown/window recreation.
-- [ ] Notification unsupported/denied/click paths have automated fakes plus native smoke checks.
-- [ ] Notification content is not written to diagnostic logs.
+## Remaining release acceptance
 
-## Integration
+Actual tray availability, notification permission behavior and native quit/update interactions. These items remain explicit release checks. No main merge, tag or release was created.
 
-Do not treat this plan as a working tray implementation. Implement, run core checks, then merge `origin/feat/system-tray` into the target app after review.
+## Traceability
 
-
-## Implementation and evidence
-
-This branch now contains current main, the shared validated plugin framework, and only the system-tray implementation with its required dependencies. It is not an all-features snapshot.
-
-See [plan, implementation, tests and remaining acceptance](documentation/features/system-tray.md). The integrated suite passed combined main/renderer typechecks, 91 unit tests (including real Node SQLite), and a full production build. Browser and native/package CI outcomes are recorded separately in the integration PR; do not infer a target-OS/provider/signature result from unit tests.
-
-The original acceptance checklist above is retained as release validation, not falsely checked off. No main merge, tag or release was made.
+- [Implementation, security boundaries, tests and remaining acceptance](documentation/features/system-tray.md)
+- [Original historical specification](documentation/features/system-tray-original-plan.md)
+- [Complete integration review](https://github.com/jadogeri/Electron-Vite-App-Template/pull/3)
+- [Selecting optional branches](documentation/FEATURE_INTEGRATION.md)
