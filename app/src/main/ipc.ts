@@ -6,6 +6,8 @@ import { getSettings, setTheme } from './settings'
 import { assertTrustedSender } from './trust'
 import { saveFileSchema, themeSchema } from '../shared/validation'
 import { handle } from './handle'
+import { translateMain as t } from './localization'
+import { getMainWindows } from './feature-host'
 
 export function registerIPC(): void {
 
@@ -16,7 +18,7 @@ export function registerIPC(): void {
     return setTheme(themeSchema.parse(theme))
   })
   nativeTheme.on('updated', () => {
-    for (const window of BrowserWindow.getAllWindows()) {
+    for (const window of getMainWindows()) {
       window.webContents.send(channels.themeChanged, nativeTheme.shouldUseDarkColors)
     }
   })
@@ -34,7 +36,7 @@ export function registerIPC(): void {
     const filePath = result.filePaths[0]
     const info = await stat(filePath)
     if (!info.isFile() || info.size > 10 * 1024 * 1024) throw new Error('Select a text file smaller than 10 MB')
-    event.sender.send(channels.toast, 'File opened successfully')
+    event.sender.send(channels.toast, t('File opened successfully'))
     return {
       path: filePath,
       name: basename(filePath),

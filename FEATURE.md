@@ -2,9 +2,9 @@
 
 Branch: `feat/telemetry-sentry`  
 Roadmap: **28. Sentry / PostHog integration hook**  
-Status: **planned; this branch adds this specification only, not runtime functionality.**
+Status: **implemented for review; target-OS and external-account acceptance is separate.**
 
-## Features to add
+## Implemented scope from the original plan
 
 - Provider adapter for main/renderer crash reporting; choose one provider for the first implementation.
 - Explicit consent, **off by default**, with durable versioned preference and revocation.
@@ -32,3 +32,12 @@ Optional `@sentry/electron` or PostHog SDK after a provider decision. Configure 
 ## Integration
 
 Implement the privacy policy, consent flow and provider before merging `origin/feat/telemetry-sentry`. No telemetry is enabled by this plan.
+
+
+## Implementation and evidence
+
+This branch now contains current main, the shared validated plugin framework, and only the telemetry-sentry implementation with its required dependencies. It is not an all-features snapshot.
+
+See [plan, implementation, tests and remaining acceptance](documentation/features/telemetry-sentry.md). The integrated suite passed combined main/renderer typechecks, 91 unit tests (including real Node SQLite), and a full production build. Browser and native/package CI outcomes are recorded separately in the integration PR; do not infer a target-OS/provider/signature result from unit tests.
+
+The original acceptance checklist above is retained as release validation, not falsely checked off. No main merge, tag or release was made.

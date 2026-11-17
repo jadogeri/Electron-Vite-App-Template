@@ -4,6 +4,8 @@ import { fileURLToPath } from 'node:url'
 import { is } from '@electron-toolkit/utils'
 import { getWindowState, saveWindowState } from './settings'
 import { safeExternalURL } from '../shared/validation'
+import { attachFeatures, featureWindowOptions } from './feature-host'
+import { translateMain as t } from './localization'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -29,6 +31,7 @@ export function createMainWindow(): BrowserWindow {
     minHeight: 500,
     show: false,
     icon: appIcon,
+    ...featureWindowOptions(),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: true,
@@ -36,16 +39,17 @@ export function createMainWindow(): BrowserWindow {
       nodeIntegration: false
     }
   })
+  attachFeatures(mainWindow)
 
   if (saved.maximized) mainWindow.maximize()
   mainWindow.once('ready-to-show', () => mainWindow.show())
   mainWindow.webContents.on('render-process-gone', () => {
     if (mainWindow.isDestroyed()) return
     void dialog.showMessageBox(mainWindow, {
-      type: 'error', title: 'Display process stopped',
-      message: 'The application display stopped unexpectedly.',
-      detail: 'Reload the window to recover, or close the application.',
-      buttons: ['Reload', 'Close'], defaultId: 0, cancelId: 1
+      type: 'error', title: t('Display process stopped'),
+      message: t('The application display stopped unexpectedly.'),
+      detail: t('Reload the window to recover, or close the application.'),
+      buttons: [t('Reload'), t('Close')], defaultId: 0, cancelId: 1
     }).then(({ response }) => {
       if (mainWindow.isDestroyed()) return
       if (response === 0) mainWindow.reload()
