@@ -2,7 +2,7 @@
 
 Source: the maintainer's uploaded 30-feature Electron + Vite roadmap.
 
-**Status:** core features 1–14 are on `main`. All ten optional branches now have real main/renderer implementations, combined for review in `implementation/all-features`. Implementation and automated tests are not certification of target-OS behavior, trusted signatures, or external accounts. See the per-feature evidence below.
+**Implementation status: Completed.** Core features 1–14 are on `main`; all ten optional branches now have real main/renderer implementations and passing automated checks, combined for review in `implementation/all-features`. **Release/native/account acceptance remains pending where listed below**: automated smoke is not certification of every OS interaction, trusted signatures or external accounts. See the per-feature evidence.
 
 ## Core (target: `main`)
 
