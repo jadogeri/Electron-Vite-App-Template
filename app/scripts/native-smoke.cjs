@@ -7,7 +7,7 @@
 const { app, utilityProcess } = require('electron')
 const { createRequire } = require('node:module')
 const { randomUUID } = require('node:crypto')
-const { mkdtempSync, rmSync, statSync } = require('node:fs')
+const { mkdtempSync, rmSync, existsSync } = require('node:fs')
 const { tmpdir } = require('node:os')
 const { join, resolve } = require('node:path')
 const assert = require('node:assert/strict')
@@ -130,14 +130,22 @@ async function runNativeSmoke(options = {}) {
   const packaged = options.packaged === true || app.isPackaged
   const root = packaged ? app.getAppPath() : resolve(__dirname, '..')
   const entry = join(root, 'out', 'main', 'worker-process.cjs')
-  if (!statSync(entry).isFile()) throw smokeError('SMOKE_WORKER_ENTRY_MISSING')
-  checkSqlite(root)
-  console.log('PASS native SQLite disk CRUD, rollback and reopen')
-  await checkUtilityProcess(entry, false)
-  console.log('PASS native utility-process prime result')
-  await checkUtilityProcess(entry, true)
-  console.log('PASS native utility-process progress and cancellation')
-  return { sqlite: 'passed', utilityResult: 'passed', utilityCancellation: 'passed', packaged }
+  const requireFromApp = createRequire(join(root, 'package.json'))
+  let hasSqlite = false
+  try { requireFromApp.resolve('better-sqlite3'); hasSqlite = true } catch {}
+  const hasWorker = existsSync(entry)
+  if (!hasSqlite && !hasWorker) throw smokeError('SMOKE_NO_NATIVE_FEATURE_SELECTED')
+  if (hasSqlite) {
+    checkSqlite(root)
+    console.log('PASS native SQLite disk CRUD, rollback and reopen')
+  } else console.log('SKIP SQLite (optional feature not selected)')
+  if (hasWorker) {
+    await checkUtilityProcess(entry, false)
+    console.log('PASS native utility-process prime result')
+    await checkUtilityProcess(entry, true)
+    console.log('PASS native utility-process progress and cancellation')
+  } else console.log('SKIP utility process (optional feature not selected)')
+  return { sqlite: hasSqlite ? 'passed' : 'not-selected', utilityResult: hasWorker ? 'passed' : 'not-selected', utilityCancellation: hasWorker ? 'passed' : 'not-selected', packaged }
 }
 
 async function runNativeSmokeAndExit(options = {}) {

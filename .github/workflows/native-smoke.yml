@@ -10,6 +10,7 @@ permissions:
   contents: read
 jobs:
   native:
+    if: github.event_name == 'pull_request' || startsWith(github.ref_name, 'implementation/') || github.ref_name == 'feat/sqlite-db' || github.ref_name == 'feat/worker-process'
     strategy:
       fail-fast: false
       matrix:
