@@ -12,6 +12,7 @@
 
 ### Fixed
 
+- An empty GitHub release feed now shows an informational “updates not set up” state instead of the generic startup update-check error. Both the updater error event and rejected check promise use the same classification; real update failures remain errors.
 - Browser preview no longer crashes silently on a missing Electron bridge.
 - Updater listeners and IPC handlers register once, including after macOS window recreation.
 - Removed unrelated product metadata from the starter's HTML.

@@ -1,0 +1,178 @@
+import { existsSync } from 'node:fs'
+import { resolve } from 'node:path'
+const installed = (id: string) => existsSync(resolve(process.cwd(), 'src/renderer/src/features', id, 'index.tsx'))
+import { test, expect } from '@playwright/test'
+import { mockDesktopFeatures } from './features-desktop-bridge'
+
+test('host mounts only bridge-listed desktop plugins in titlebar and global slots', async ({ page }) => {
+  test.skip(!["frameless-window"].every(installed), 'Optional plugin is not present in this branch');
+  await mockDesktopFeatures(page, { selected: ['frameless-window'] })
+  await page.goto('/')
+  await expect(page.getByRole('heading', { name: 'Your next desktop app starts here.' })).toBeVisible()
+  await expect(page.getByText('Window style', { exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: /^Commands/ })).toHaveCount(0)
+  await expect(page.getByRole('complementary', { name: 'Background and notifications' })).toHaveCount(0)
+  await expect.poll(() => page.evaluate(() => window.__desktopTest.listCalls)).toBeGreaterThan(0)
+  expect(await page.evaluate(() => window.__desktopTest.calls.some(call =>
+    call.feature === 'frameless-window' && call.method === 'state'))).toBe(true)
+  expect(await page.evaluate(() => window.__desktopTest.calls.every(call => call.feature === 'frameless-window'))).toBe(true)
+})
+
+test('palette shortcut toggles once, traps keyboard focus, and restores the trigger', async ({ page }) => {
+  test.skip(!["command-palette"].every(installed), 'Optional plugin is not present in this branch');
+  await mockDesktopFeatures(page)
+  await page.goto('/')
+  const trigger = page.getByRole('button', { name: /^Commands/ })
+  await expect(trigger).toBeVisible()
+  await trigger.focus()
+  await page.keyboard.press('Control+k')
+  const dialog = page.getByRole('dialog', { name: 'Commands', exact: true })
+  const search = dialog.getByRole('combobox', { name: 'Find a command' })
+  await expect(dialog).toBeVisible()
+  await expect(search).toBeFocused()
+  await page.keyboard.press('Shift+Tab')
+  await expect(dialog.getByRole('button', { name: 'Close commands' })).toBeFocused()
+  await page.keyboard.press('Tab')
+  await expect(search).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(dialog).toHaveCount(0)
+  await expect(trigger).toBeFocused()
+  await page.keyboard.press('Control+k')
+  await expect(dialog).toBeVisible()
+  await page.keyboard.press('Control+k')
+  await expect(dialog).toHaveCount(0)
+  await expect(trigger).toBeFocused()
+  const counts = await page.evaluate(() => window.__desktopTest.listenerCounts())
+  expect(counts['command-palette:execute']).toBe(1)
+  expect(counts['command-palette:open']).toBe(1)
+  expect(counts['system-tray:toast']).toBe(installed('system-tray') ? 1 : undefined)
+})
+
+test('palette filters actual commands, dispatches Enter/arrow selection, navigates and changes theme', async ({ page }) => {
+  test.skip(!["command-palette"].every(installed), 'Optional plugin is not present in this branch');
+  await mockDesktopFeatures(page)
+  await page.goto('/')
+  const trigger = page.getByRole('button', { name: /^Commands/ })
+  await expect(trigger).toBeVisible()
+  await trigger.click()
+  const dialog = page.getByRole('dialog', { name: 'Commands', exact: true })
+  const search = dialog.getByRole('combobox', { name: 'Find a command' })
+  await search.fill('no such command')
+  await expect(dialog.getByRole('option')).toHaveCount(0)
+  await expect(dialog.getByText('No matching commands')).toBeVisible()
+  await search.fill('navigate')
+  await expect(dialog.getByRole('option')).toHaveCount(2)
+  await page.keyboard.press('ArrowDown')
+  await expect(dialog.getByRole('option', { name: 'Go to Dashboard' })).toHaveAttribute('aria-selected', 'true')
+  await page.keyboard.press('Enter')
+  await expect(dialog).toHaveCount(0)
+  await expect(page.getByRole('heading', { name: 'Dashboard', exact: true })).toBeVisible()
+  await expect(page).toHaveURL(/#\/dashboard$/)
+  await page.keyboard.press('Control+,')
+  await expect(page.getByRole('heading', { name: 'Settings', exact: true })).toBeVisible()
+  await page.keyboard.press('Control+k')
+  await search.fill('theme night')
+  await expect(dialog.getByRole('option', { name: 'Appearance: Dark' })).toHaveCount(1)
+  await page.keyboard.press('Enter')
+  await expect(dialog).toHaveCount(0)
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+  await expect(page.getByLabel('Appearance', { exact: true })).toHaveValue('dark')
+  expect(await page.evaluate(() => window.__desktopTest.calls
+    .filter(call => call.feature === 'command-palette' && call.method === 'run').map(call => call.input)))
+    .toEqual(['dashboard', 'settings', 'theme-dark'])
+})
+
+test('native-frame state keeps opt-in reachable and persists restart-required choice', async ({ page }) => {
+  test.skip(!["frameless-window"].every(installed), 'Optional plugin is not present in this branch');
+  await mockDesktopFeatures(page)
+  await page.goto('/')
+  await page.getByText('Window style', { exact: true }).click()
+  const enabled = page.getByRole('checkbox', { name: 'Use custom title bar after restart' })
+  await expect(enabled).toBeEnabled()
+  await expect(enabled).not.toBeChecked()
+  await expect(page.getByRole('button', { name: 'Minimize window', exact: true })).toHaveCount(0)
+  await enabled.check()
+  await expect(enabled).toBeChecked()
+  await expect(page.getByText('Window style saved. Quit and reopen to apply.', { exact: true })).toBeVisible()
+  // Saving an opt-in must not silently remove the active native controls.
+  await expect(page.getByRole('button', { name: 'Minimize window', exact: true })).toHaveCount(0)
+  expect(await page.evaluate(() => window.__desktopTest.calls.filter(call =>
+    call.feature === 'frameless-window' && call.method === 'setEnabled').map(call => call.input)))
+    .toEqual([{ enabled: true }])
+  await page.reload()
+  await expect(page.getByRole('button', { name: 'Minimize window', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Maximize or restore window' }).click()
+  expect(await page.evaluate(() => window.__desktopTest.calls.some(call =>
+    call.feature === 'frameless-window' && call.method === 'control' && call.input === 'maximize'))).toBe(true)
+})
+
+test('tray preferences use explicit consent and unsupported notifications fall back in-app', async ({ page }) => {
+  test.skip(!["system-tray"].every(installed), 'Optional plugin is not present in this branch');
+  await mockDesktopFeatures(page, { trayAvailable: false })
+  await page.goto('/')
+  const tray = page.getByRole('complementary', { name: 'Background and notifications' })
+  await expect(tray).toBeVisible()
+  await tray.getByText('Background and notifications', { exact: true }).click()
+  const background = tray.getByRole('checkbox', { name: 'Run in the background when closing' })
+  const notifications = tray.getByRole('checkbox', { name: 'Allow native desktop notifications' })
+  await expect(background).toBeEnabled()
+  await expect(background).not.toBeChecked()
+  await expect(notifications).not.toBeChecked()
+  await background.check()
+  await expect(tray.getByRole('status')).toHaveText('System tray is unavailable here. Closing the window will not hide it.')
+  await notifications.check()
+  await expect(notifications).toBeChecked()
+  await tray.getByRole('button', { name: 'Test notification' }).click()
+  await expect(tray.getByRole('status')).toHaveText('Workspace: Your notification test is ready.')
+  await tray.getByRole('button', { name: 'Dismiss background notification' }).click()
+  await expect(tray.getByRole('status')).toBeEmpty()
+  expect(await page.evaluate(() => window.__desktopTest.calls
+    .filter(call => call.feature === 'system-tray' && call.method === 'preferences').map(call => call.input)))
+    .toEqual([{ background: true, notifications: false }, { background: true, notifications: true }])
+  // Global placement continues receiving fallback events after route changes.
+  await page.getByRole('link', { name: 'Dashboard', exact: true }).click()
+  await page.evaluate(() => window.__desktopTest.emit('system-tray', 'toast', {
+    title: 'Background task', body: 'Finished without a native notification.'
+  }))
+  await expect(tray.getByRole('status')).toHaveText('Background task: Finished without a native notification.')
+})
+
+test('global shortcut conflicts recover without duplicate renderer subscriptions', async ({ page }) => {
+  test.skip(!["command-palette"].every(installed), 'Optional plugin is not present in this branch');
+  await mockDesktopFeatures(page, { shortcutConflict: true })
+  await page.goto('/')
+  await page.getByText('Keyboard shortcuts', { exact: true }).click()
+  const globalShortcut = page.getByRole('checkbox', { name: 'Enable cross-app Ctrl/⌘ Alt Space to open commands' })
+  await expect(globalShortcut).toBeEnabled()
+  await expect(globalShortcut).not.toBeChecked()
+  await globalShortcut.check()
+  await expect(page.getByRole('alert')).toHaveText('Shortcut unavailable or used by another app. Disable and re-enable to retry.')
+  await globalShortcut.uncheck()
+  await expect(page.getByRole('alert')).toHaveCount(0)
+  await page.evaluate(() => window.__desktopTest.emit('command-palette', 'open', {}))
+  await expect(page.getByRole('dialog', { name: 'Commands', exact: true })).toBeVisible()
+  await page.keyboard.press('Escape')
+  await page.getByRole('link', { name: 'Dashboard', exact: true }).click()
+  expect(await page.evaluate(() => window.__desktopTest.listenerCounts()['command-palette:execute'])).toBe(1)
+})
+
+test('rejected feature requests show safe UI errors without hiding working plugins', async ({ page }) => {
+  test.skip(!["frameless-window","command-palette"].every(installed), 'Optional plugin is not present in this branch');
+  await mockDesktopFeatures(page)
+  await page.goto('/')
+  await page.getByText('Window style', { exact: true }).click()
+  const enabled = page.getByRole('checkbox', { name: 'Use custom title bar after restart' })
+  await expect(enabled).toBeEnabled()
+  await page.evaluate(() => window.__desktopTest.failNext('frameless-window:setEnabled'))
+  await enabled.click()
+  await expect(page.getByText('Unable to save window style', { exact: true })).toBeVisible()
+  await expect(enabled).not.toBeChecked()
+  await page.getByRole('button', { name: /^Commands/ }).click()
+  const dialog = page.getByRole('dialog', { name: 'Commands', exact: true })
+  await dialog.getByRole('combobox').fill('preferences')
+  await page.evaluate(() => window.__desktopTest.failNext('command-palette:run'))
+  await page.keyboard.press('Enter')
+  await expect(page.getByText('Command unavailable. Please try again.', { exact: true })).toBeVisible()
+  await expect(dialog).toBeVisible()
+  await page.keyboard.press('Escape')
+})
