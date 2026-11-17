@@ -1,42 +1,32 @@
-# Frameless window and startup splash
+# frameless-window
 
-Branch: `feat/frameless-window`  
-Roadmap: **15. Custom frameless title bar · 16. Startup splash screen**  
-Status: **implemented for review; target-OS and external-account acceptance is separate.**
+Branch: `feat/frameless-window`
 
-## Implemented scope from the original plan
+Status: **Completed — implementation and automated checks.**
 
-- Opt-in frameless BrowserWindow with a draggable title bar; interactive controls use `-webkit-app-region: no-drag`.
-- Typed minimize, maximize/restore, and close requests; main validates the sender and operates only on its owning window.
-- Accessible cross-platform window controls with macOS traffic-light accommodation.
-- Lightweight local splash window during initialization, destroyed on ready-to-show, timeout, or startup failure.
-- Subtle loading animation and fade transition, disabled for reduced motion; no artificial initialization delay.
+Release/native/account acceptance: **Pending where listed below; not implied by implementation completion.**
 
-## Implementation map
+## Delivered
 
-Extend `app/src/main/window.ts`, the shared IPC contract, and preload; add renderer `TitleBar`/`Splash` components and tests. Keep the existing geometry persistence, navigation protections, CSP, and updater intact.
+Custom title bar, persisted native/custom choice, bounded splash lifecycle. This branch contains current main, the common secure feature framework and only this optional plugin with its required dependency/build changes. Other optional plugin directories and dependencies are absent.
 
-## Dependencies and configuration
+## Verified evidence
 
-Use built-in Electron/CSS APIs. No extra packages or secrets. Make frameless mode a deliberate setting/build option; do not silently remove native accessibility behavior.
+- [x] Main-process and renderer TypeScript checks passed on this branch.
+- [x] All 24 branch unit tests passed.
+- [x] Full production main/preload/renderer build passed.
+- [x] Dependency lock portability and declared dependency reconciliation passed.
+- [x] All 2 installed-feature production-browser scenarios passed on this branch; absent-plugin scenarios skipped only after checking actual source files.
 
-## Acceptance tests
+The complete compatible suite separately passed **91 unit tests and all 37 production-renderer browser scenarios with no skips**. Browser bridges are transport doubles, not proof of native APIs or real providers. Actual unsigned Electron and packaged SQLite/utility-process smoke passed on Windows, macOS and Linux in [native CI](https://github.com/jadogeri/Electron-Vite-App-Template/actions/runs/44120989994); this integrated evidence is not a claim that this branch passed every native acceptance item.
 
-- [ ] Minimize, maximize/restore, close, drag, resize, keyboard focus, and double-click work on Windows/macOS/Linux.
-- [ ] Title controls never invoke arbitrary window IDs or channels.
-- [ ] Splash closes exactly once on success; failure/timeout does not leave an orphan process.
-- [ ] Tests cover transitions, error paths, and reduced motion.
-- [ ] Merge alongside another optional branch without removing core settings or IPC protections.
+## Remaining release acceptance
 
-## Integration
+Native controls, draggable areas, traffic lights and screen-reader behavior on every target OS. These items remain explicit release checks. No main merge, tag or release was created.
 
-Implement and test before using this branch as an add-on. Once approved: fetch, merge `origin/feat/frameless-window`, run all checks, then perform native window smoke tests. See `documentation/TESTING.md`.
+## Traceability
 
-
-## Implementation and evidence
-
-This branch now contains current main, the shared validated plugin framework, and only the frameless-window implementation with its required dependencies. It is not an all-features snapshot.
-
-See [plan, implementation, tests and remaining acceptance](documentation/features/frameless-window.md). The integrated suite passed combined main/renderer typechecks, 91 unit tests (including real Node SQLite), and a full production build. Browser and native/package CI outcomes are recorded separately in the integration PR; do not infer a target-OS/provider/signature result from unit tests.
-
-The original acceptance checklist above is retained as release validation, not falsely checked off. No main merge, tag or release was made.
+- [Implementation, security boundaries, tests and remaining acceptance](documentation/features/frameless-window.md)
+- [Original historical specification](documentation/features/frameless-window-original-plan.md)
+- [Complete integration review](https://github.com/jadogeri/Electron-Vite-App-Template/pull/3)
+- [Selecting optional branches](documentation/FEATURE_INTEGRATION.md)
