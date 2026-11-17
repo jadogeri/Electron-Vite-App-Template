@@ -2,9 +2,9 @@
 
 Branch: `feat/system-tray`  
 Roadmap: **17. System tray / minimize-to-tray · 18. Native OS notifications**  
-Status: **planned; this branch adds this specification only, not runtime functionality.**
+Status: **implemented for review; target-OS and external-account acceptance is separate.**
 
-## Features to add
+## Implemented scope from the original plan
 
 - Retained main-process Tray instance with platform-appropriate icon assets.
 - Show/Hide/Quit menu and double-click restoration.
@@ -32,3 +32,12 @@ Built-in Electron APIs. Supply distinct monochrome/template macOS tray assets. R
 ## Integration
 
 Do not treat this plan as a working tray implementation. Implement, run core checks, then merge `origin/feat/system-tray` into the target app after review.
+
+
+## Implementation and evidence
+
+This branch now contains current main, the shared validated plugin framework, and only the system-tray implementation with its required dependencies. It is not an all-features snapshot.
+
+See [plan, implementation, tests and remaining acceptance](documentation/features/system-tray.md). The integrated suite passed combined main/renderer typechecks, 91 unit tests (including real Node SQLite), and a full production build. Browser and native/package CI outcomes are recorded separately in the integration PR; do not infer a target-OS/provider/signature result from unit tests.
+
+The original acceptance checklist above is retained as release validation, not falsely checked off. No main merge, tag or release was made.

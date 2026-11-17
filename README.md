@@ -49,6 +49,8 @@ Initialization shows a spinner and shimmer while settings/version load. The upda
 
 Installation requires an explicit **Restart & Install** click. The app then exits so the OS installer can run; the renderer does not pretend to show real post-exit installation progress. Development mode never downloads or installs updates.
 
+If the configured GitHub repository has no published releases, the installed app shows **“Updates haven't been set up yet”**, not a failure or a false “up to date” result. Network, permissions, malformed feeds, and missing update-metadata errors remain visible. See [SUPPORT.md](SUPPORT.md).
+
 ## Release configuration
 
 1. Set your own app ID, product name, icons, and GitHub publish repository in `app/package.json`.
