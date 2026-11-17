@@ -10,6 +10,7 @@ import {
 } from '../src/main/features/auth-security/core'
 import { EncryptedVault, type Encryption } from '../src/main/features/auth-security/vault'
 import { OidcProvider, boundedJson, readConfig, type Http } from '../src/main/features/auth-security/provider'
+import { assertSafeData } from '../src/main/feature-procedure'
 
 // Synthetic test data only; never obtain, snapshot, or log real account credentials.
 const credentials = (): Credentials => ({ accessToken: 'synthetic-access', refreshToken: 'synthetic-refresh', expiresAt: 2_000_000 })
@@ -64,6 +65,32 @@ test('unconfigured provider defaults disabled and cannot begin login', async () 
   assert.equal((await auth.signIn()).state, 'disabled')
   await auth.onProtocol(`${CALLBACK_URL}?state=any&code=x`)
   assert.equal((await auth.signOut()).state, 'disabled')
+})
+test('all auth method results and event DTOs satisfy actual host serialization', async () => {
+  const f = fixture()
+  assertSafeData(f.auth.status())
+  assertSafeData(await f.auth.signIn())
+  assertSafeData(f.auth.cancel())
+  assertSafeData(await f.auth.signIn())
+  await f.auth.onProtocol(f.callback())
+  assertSafeData(f.auth.status())
+  assertSafeData(await f.auth.signOut())
+  f.events.forEach(event => assertSafeData(event))
+})
+test('renderer delivery failure cannot invalidate stored session; shutdown blocks new browser actions', async () => {
+  const f = fixture()
+  const auth = new AuthController(f.provider, f.vault, async () => {}, () => {
+    throw new Error('renderer destroyed')
+  }, () => 1_000_000)
+  assert.equal((await auth.signIn()).state, 'signing-in')
+  await auth.onProtocol(f.callback())
+  assert.equal(auth.status().state, 'signed-in')
+  assert.ok(f.stored())
+  await auth.signOut()
+  await auth.shutdown()
+  const before = f.request()
+  assert.equal((await auth.signIn()).state, 'signed-out')
+  assert.equal(f.request(), before)
 })
 test('wrong state does not consume attempt; concurrent and replay callbacks exchange exactly once', async () => {
   const f = fixture()

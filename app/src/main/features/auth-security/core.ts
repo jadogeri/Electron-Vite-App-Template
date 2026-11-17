@@ -66,6 +66,7 @@ export class AuthController {
   // Serialize disk operations so cancellation/logout cannot race an in-flight token write.
   private disk: Promise<unknown> = Promise.resolve()
   private saved: Credentials | null = null
+  private stopped = false
   constructor(
     private provider: Provider | null,
     private vault: Vault,
@@ -88,7 +89,9 @@ export class AuthController {
       this.sessionTimer = setTimeout(() => this.expireSession(), Math.max(1, Math.min(status.expiresAt - this.now(), 2_147_000_000)))
       this.sessionTimer.unref?.()
     }
-    this.changed(this.status())
+    // Delivery is best-effort: a closing renderer must not roll back a successful
+    // credential write or turn an authenticated session into a reported failure.
+    try { this.changed(this.status()) } catch { /* Querying status remains available. */ }
   }
   private expireSession(): void {
     if (this.statusValue.state !== 'signed-in' || this.statusValue.expiresAt === undefined) return
@@ -125,7 +128,7 @@ export class AuthController {
     }
   }
   async signIn(): Promise<SessionStatus> {
-    if (!this.provider || this.pending || this.statusValue.state === 'signing-in' ||
+    if (this.stopped || !this.provider || this.pending || this.statusValue.state === 'signing-in' ||
         this.statusValue.state === 'signed-in') return this.status()
     if (!this.vault.available()) {
       this.set({ configured: true, state: 'signed-out', error: 'storage' })
@@ -225,6 +228,7 @@ export class AuthController {
     return this.status()
   }
   async shutdown(): Promise<void> {
+    this.stopped = true
     ++this.generation
     this.stopAttempt()
     clearTimeout(this.sessionTimer)
