@@ -1,11 +1,31 @@
 import { resolve } from 'node:path'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import react from '@vitejs/plugin-react'
+import { build } from 'vite'
 
 export default defineConfig({
   main: {
     build: { rollupOptions: { output: { format: 'es', entryFileNames: 'index.mjs' } } },
-    plugins: [externalizeDepsPlugin()]
+    plugins: [externalizeDepsPlugin(), {
+      name: 'utility-process-entry',
+      writeBundle: {
+        order: 'pre',
+        sequential: true,
+        async handler() {
+          const { existsSync } = await import('node:fs')
+          const entry = resolve('src/main/features/worker-process/worker.ts')
+          if (!existsSync(entry)) return
+          await build({
+            configFile: false,
+            build: {
+              emptyOutDir: false, outDir: 'out/main', minify: false,
+              lib: { entry, formats: ['cjs'], fileName: () => 'worker-process.cjs' },
+              rollupOptions: { external: ['electron', /^node:/] }
+            }
+          })
+        }
+      }
+    }]
   },
   preload: {
     plugins: [externalizeDepsPlugin()]
