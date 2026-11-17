@@ -2,7 +2,7 @@
 
 Source: the maintainer's uploaded 30-feature Electron + Vite roadmap.
 
-**Status:** features 1–14 have core code in `feat/core-foundation`, proposed for `main`. The ten optional branches below contain specifications only; features 15–30 are **planned, not implemented**. This distinction is intentional and must stay visible until each add-on has code and native validation.
+**Status:** core features 1–14 are on `main`. All ten optional branches now have real main/renderer implementations, combined for review in `implementation/all-features`. Implementation and automated tests are not certification of target-OS behavior, trusted signatures, or external accounts. See the per-feature evidence below.
 
 ## Core (target: `main`)
 
@@ -27,24 +27,24 @@ Implementation is not equivalent to verification on every OS. See [TESTING.md](T
 
 ## Optional branches
 
-| Branch | Features to add | Status |
+| Branch | Implemented scope | Remaining validation |
 | --- | --- | --- |
-| `feat/frameless-window` | 15 custom title bar; 16 startup splash | Plan only |
-| `feat/system-tray` | 17 tray/minimize-to-tray; 18 native notifications | Plan only |
-| `feat/command-palette` | 19 keyboard shortcuts; 20 command palette; 21 context menu | Plan only |
-| `feat/sqlite-db` | 22 better-sqlite3 + Drizzle | Plan only |
-| `feat/auth-security` | 23 deep links; 24 safeStorage credentials | Plan only |
-| `feat/offline-sync` | 25 connectivity and sync queue | Plan only |
-| `feat/worker-process` | 26 utility-process CPU tasks | Plan only |
-| `feat/i18n` | 27 locale detection + i18next | Plan only |
-| `feat/telemetry-sentry` | 28 opt-in crash reporting | Plan only |
-| `feat/code-signing` | 29 signing/notarization; 30 updater channels | Plan only |
+| `feat/frameless-window` | 15 custom title bar; 16 bounded splash | Native controls/accessibility on each OS |
+| `feat/system-tray` | 17 persisted tray/background preferences; 18 notification fallback | Desktop tray/permission behavior |
+| `feat/command-palette` | 19 bounded shortcuts; 20 searchable keyboard palette; 21 native menus | OS shortcut conflicts and screen readers |
+| `feat/sqlite-db` | 22 real better-sqlite3 + Drizzle disk CRUD/migrations | Packaged addon architecture matrix |
+| `feat/auth-security` | 23 bounded OIDC callbacks; 24 protected safeStorage vault | Live provider and OS keychains/ACLs |
+| `feat/offline-sync` | 25 durable bounded queue, idempotency, retry/conflict resolution | Deployed backend and physical network transitions |
+| `feat/worker-process` | 26 bounded utility-process prime jobs/cancellation | Packaged native process matrix |
+| `feat/i18n` | 27 persisted system/en/es locale, i18next, core/native labels | OS locale changes and translation review |
+| `feat/telemetry-sentry` | 28 default-off consent, allowlisted diagnostics | Real Sentry delivery; full source-mapped native crashes not implemented |
+| `feat/code-signing` | 29 fail-closed signed build/verification; 30 safe update channels | Certificate-backed signing, notarization and real installer updates |
 
-Each optional branch has a root `FEATURE.md` describing scope, likely files, dependency/secret requirements, security boundaries, and testable acceptance criteria.
+Each optional branch has a root `FEATURE.md` and a plan/implementation/evidence document at `documentation/features/<id>.md`. Disabled-by-default integrations do not contact providers without configuration or consent.
 
 ## Branch usage
 
-The ten branches share the proposed core commit. Review the core PR first. After core merges, optional branch changes can be reviewed independently against `main`. Until then, compare against `feat/core-foundation`.
+The ten branches share current main and the common feature framework. Review the integrated PR for compatibility, or select optional branches independently. See [FEATURE_INTEGRATION.md](FEATURE_INTEGRATION.md) for dependency reconciliation and merge guidance.
 
 Once an add-on is implemented, tested, and reviewed:
 
@@ -56,4 +56,4 @@ cd app
 npm ci
 ```
 
-**Today these merges add documentation only.** They do not install SQLite, Sentry, auth, or any other optional runtime feature.
+These branches add real runtime functionality and may add dependencies. SQLite needs an Electron-target native rebuild before launching; provider-backed features remain disabled until explicitly configured.
