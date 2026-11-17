@@ -2,9 +2,9 @@
 
 Branch: `feat/auth-security`  
 Roadmap: **23. Custom protocol / deep links · 24. Electron safeStorage credentials**  
-Status: **planned; this branch adds this specification only, not runtime functionality.**
+Status: **implemented for review; target-OS and external-account acceptance is separate.**
 
-## Features to add
+## Implemented scope from the original plan
 
 - Register an application-specific URL scheme and handle macOS `open-url` plus Windows/Linux launch/second-instance arguments.
 - Queue validated callbacks until the main window is ready, then complete a single pending OAuth flow.
@@ -32,3 +32,12 @@ Choose the identity provider at implementation time. Public desktop clients use 
 ## Integration
 
 This plan is not an authentication system. Implement the provider and native tests before merging `origin/feat/auth-security`.
+
+
+## Implementation and evidence
+
+This branch now contains current main, the shared validated plugin framework, and only the auth-security implementation with its required dependencies. It is not an all-features snapshot.
+
+See [plan, implementation, tests and remaining acceptance](documentation/features/auth-security.md). The integrated suite passed combined main/renderer typechecks, 91 unit tests (including real Node SQLite), and a full production build. Browser and native/package CI outcomes are recorded separately in the integration PR; do not infer a target-OS/provider/signature result from unit tests.
+
+The original acceptance checklist above is retained as release validation, not falsely checked off. No main merge, tag or release was made.

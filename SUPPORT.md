@@ -16,6 +16,16 @@ That is expected: preload APIs exist only in Electron. Use `npm run dev`. Playwr
 
 Intentional. The auto-updater needs a packaged application, a published release, matching update metadata, and supported installers. Checking in development reports up to date without network activity.
 
+### The installed app says updates have not been set up
+
+The GitHub repository has no published releases yet. This is an informational setup state, not an installer failure or a claim that the app is up to date. The app still starts and can be used normally.
+
+To enable real updates, configure the publish repository, build and test installers plus the matching platform update metadata, then publish a reviewed release. Draft releases are not publicly discoverable. A version tag alone is not enough.
+
+Real network, permission, invalid-feed, or missing update-metadata failures still show an error. Do not fix those by suppressing every HTTP 404 or disabling update checks.
+
+Older installers display the generic “Unable to check for updates” warning for an empty feed. After merging the fix, rebuild and reinstall the application to get the new message; an already-installed binary cannot acquire this change without a new installer or a working published update.
+
 ### Windows or macOS warns about the installer
 
 The default release build is unsigned. See the `feat/code-signing` plan; trusted signing needs certificates/accounts that are not bundled with this template.
