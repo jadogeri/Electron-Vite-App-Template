@@ -1,6 +1,8 @@
 import { app, BrowserWindow, Menu, shell } from 'electron'
 import { checkForUpdates } from './updater'
 import { channels } from '../shared/channels'
+import { translateMain as t } from './localization'
+const commands = import.meta.glob<{ desktopCommandMenu(window: BrowserWindow): Electron.MenuItemConstructorOptions[] }>('./features/command-palette/index.ts', { eager: true })
 
 export function registerAppMenu(mainWindow: BrowserWindow): void {
   const isMac = process.platform === 'darwin'
@@ -115,5 +117,23 @@ export function registerAppMenu(mainWindow: BrowserWindow): void {
     }
   ]
 
+  const additions = commands['./features/command-palette/index.ts']?.desktopCommandMenu(mainWindow)
+  if (additions?.length) template.push({ label: t('Commands'), submenu: additions })
+  const roleKeys: Record<string, string> = {
+    undo: 'Undo', redo: 'Redo', cut: 'Cut', copy: 'Copy', paste: 'Paste', delete: 'Delete',
+    selectAll: 'Select All', quit: 'Quit', close: 'Close', reload: 'Reload', forceReload: 'Force Reload',
+    toggleDevTools: 'Toggle Developer Tools', resetZoom: 'Actual Size', zoomIn: 'Zoom In', zoomOut: 'Zoom Out',
+    togglefullscreen: 'Toggle Full Screen', minimize: 'Minimize', zoom: 'Zoom', about: 'About',
+    services: 'Services', hide: 'Hide', hideOthers: 'Hide Others', unhide: 'Show All',
+    front: 'Bring All to Front', pasteAndMatchStyle: 'Paste and Match Style', window: 'Window'
+  }
+  const localize = (items: Electron.MenuItemConstructorOptions[]) => {
+    for (const item of items) {
+      if (item.label) item.label = t(item.label)
+      else if (item.role && roleKeys[item.role]) item.label = t(roleKeys[item.role])
+      if (Array.isArray(item.submenu)) localize(item.submenu)
+    }
+  }
+  localize(template)
   Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
