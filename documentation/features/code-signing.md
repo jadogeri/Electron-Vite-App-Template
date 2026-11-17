@@ -1,5 +1,9 @@
 # Signed distribution and update channels
 
+**Status: Completed — implementation and automated checks.** Release/native/account acceptance remains pending as detailed below. The original specification is preserved in [the historical plan](code-signing-original-plan.md).
+
+Branch-source checks: both TypeScript projects, 21 unit tests, full production build, and 1 installed-feature browser scenarios passed. Integrated suite: 91 unit tests and 37 production-browser scenarios, no skips. Windows/macOS/Linux unsigned native and packaged SQLite/utility-process smoke passed in [CI](https://github.com/jadogeri/Electron-Vite-App-Template/actions/runs/44120989994). This does not certify signing, real providers, keychains or every interactive OS behavior.
+
 Status: channel policy/UI, fail-closed signing configuration, manual verification workflow and automated policy checks implemented. **Trusted signed distribution is not completed.** No accounts, certificates or native signed artifacts were available or used.
 
 ## Channels

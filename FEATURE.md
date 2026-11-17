@@ -1,44 +1,32 @@
-# Code signing, notarization and updater channels
+# code-signing
 
-Branch: `feat/code-signing`  
-Roadmap: **29. Trusted distribution signing · 30. latest/beta/alpha update channels**  
-Status: **implemented for review; target-OS and external-account acceptance is separate.**
+Branch: `feat/code-signing`
 
-## Implemented scope from the original plan
+Status: **Completed — implementation and automated checks.**
 
-- macOS Developer ID signing, hardened runtime, entitlements, notarization and stapling.
-- Windows trusted signing configured through supported electron-builder tooling and a signing identity/certificate service.
-- Validate platform artifacts before publication; signing failure must fail the release rather than silently produce unsigned files.
-- Persist `latest`/`beta`/`alpha` preference in schema-validated settings and apply it before checking for updates.
-- Explicit prerelease consent, coherent version/channel metadata and safe stable-channel return behavior.
+Release/native/account acceptance: **Pending where listed below; not implied by implementation completion.**
 
-## Implementation map
+## Delivered
 
-Extend electron-builder config, CI release matrix and secrets, main settings/updater, shared channel schema and Settings UI. Keep signed configuration opt-in until credentials are configured; never add placeholder certificate values to source.
+Fail-closed signing/notarization config and manual verification workflow; consented non-downgrading update channels. This branch contains current main, the common secure feature framework and only this optional plugin with its required dependency/build changes. Other optional plugin directories and dependencies are absent.
 
-## Required accounts and secrets
+## Verified evidence
 
-Apple Developer membership/signing identity/notarization access and a Windows signing identity/provider. Use GitHub encrypted secrets for signing material and source-map/signing tokens. Document names and presence only, never values. No credentials are required or requested by this planning branch.
+- [x] Main-process and renderer TypeScript checks passed on this branch.
+- [x] All 21 branch unit tests passed.
+- [x] Full production main/preload/renderer build passed.
+- [x] Dependency lock portability and declared dependency reconciliation passed.
+- [x] All 1 installed-feature production-browser scenarios passed on this branch; absent-plugin scenarios skipped only after checking actual source files.
 
-## Acceptance tests
+The complete compatible suite separately passed **91 unit tests and all 37 production-renderer browser scenarios with no skips**. Browser bridges are transport doubles, not proof of native APIs or real providers. Actual unsigned Electron and packaged SQLite/utility-process smoke passed on Windows, macOS and Linux in [native CI](https://github.com/jadogeri/Electron-Vite-App-Template/actions/runs/44120989994); this integrated evidence is not a claim that this branch passed every native acceptance item.
 
-- [ ] macOS `codesign`/`spctl` and stapler validation succeed on downloaded artifacts.
-- [ ] Windows signature chain/timestamp verifies on a clean machine.
-- [ ] Missing signing configuration fails the signed-release workflow clearly.
-- [ ] Stable clients never receive prerelease versions without consent.
-- [ ] Channel changes, interrupted downloads and returning to stable obey explicit downgrade policy.
-- [ ] Signed install-and-update smoke tests pass on actual target OS/architectures.
-- [ ] Signing secrets and private keys do not appear in logs, bundles, or uploaded artifacts.
+## Remaining release acceptance
 
-## Integration
+Certificate-backed trusted signatures, Apple notarization and a real signed installer update. These items remain explicit release checks. No main merge, tag or release was created.
 
-Implement platform credentials/configuration and channel tests before merging `origin/feat/code-signing`. Default core release artifacts remain unsigned; this plan does not confer notarization or trusted signing.
+## Traceability
 
-
-## Implementation and evidence
-
-This branch now contains current main, the shared validated plugin framework, and only the code-signing implementation with its required dependencies. It is not an all-features snapshot.
-
-See [plan, implementation, tests and remaining acceptance](documentation/features/code-signing.md). The integrated suite passed combined main/renderer typechecks, 91 unit tests (including real Node SQLite), and a full production build. Browser and native/package CI outcomes are recorded separately in the integration PR; do not infer a target-OS/provider/signature result from unit tests.
-
-The original acceptance checklist above is retained as release validation, not falsely checked off. No main merge, tag or release was made.
+- [Implementation, security boundaries, tests and remaining acceptance](documentation/features/code-signing.md)
+- [Original historical specification](documentation/features/code-signing-original-plan.md)
+- [Complete integration review](https://github.com/jadogeri/Electron-Vite-App-Template/pull/3)
+- [Selecting optional branches](documentation/FEATURE_INTEGRATION.md)

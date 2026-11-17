@@ -8,6 +8,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: native-features-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 jobs:
   native:
     if: github.event_name == 'pull_request' || startsWith(github.ref_name, 'implementation/') || github.ref_name == 'feat/sqlite-db' || github.ref_name == 'feat/worker-process'
